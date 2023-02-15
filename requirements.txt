@@ -1,0 +1,17 @@
+torch
+torchgeometry
+torchvision
+numpy
+opencv-python
+pyopengl
+pyrender
+scikit-image
+scipy
+tensorboard
+chumpy
+smplx==0.1.13
+spacepy
+tqdm
+trimesh
+Pillow
+h5py=='2.9.0'
