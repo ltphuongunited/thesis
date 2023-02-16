@@ -14,8 +14,8 @@ class SMPL(_SMPL):
 
     def __init__(self, *args, **kwargs):
         super(SMPL, self).__init__(*args, **kwargs)
-        joints = [constants.JOINT_MAP[i] for i in constants.JOINT_NAMES]
-        J_regressor_extra = np.load(config.JOINT_REGRESSOR_TRAIN_EXTRA)
+        joints = [constants.JOINT_MAP[i] for i in constants.JOINT_NAMES] # 49
+        J_regressor_extra = np.load(config.JOINT_REGRESSOR_TRAIN_EXTRA) # (9,6890)
         self.register_buffer('J_regressor_extra', torch.tensor(J_regressor_extra, dtype=torch.float32))
         self.joint_map = torch.tensor(joints, dtype=torch.long)
 

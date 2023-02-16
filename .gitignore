@@ -121,5 +121,5 @@ data/*
 
 
 cdf38_1-dist/
-datasets/
+datasets/all
 neural_renderer/

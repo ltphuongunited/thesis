@@ -1,6 +1,5 @@
-import config
-import constants
+import torch
+from torch.nn import functional as F
 import numpy as np
+import config
 
-joint = np.load(config.JOINT_REGRESSOR_TRAIN_EXTRA)
-print(np.nonzero(joint))

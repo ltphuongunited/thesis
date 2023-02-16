@@ -5,15 +5,15 @@ Things you need to change: *_ROOT that indicate the path to each dataset
 """
 from os.path import join
 
-H36M_ROOT = 'datasets/H36M'
-LSP_ROOT = ''
-LSP_ORIGINAL_ROOT = ''
-LSPET_ROOT = ''
-MPII_ROOT = ''
-COCO_ROOT = ''
-MPI_INF_3DHP_ROOT = ''
-PW3D_ROOT = ''
-UPI_S1H_ROOT = ''
+H36M_ROOT = 'datasets/all/H36M'
+LSP_ROOT = 'datasets/all/lsp_dataset'
+LSP_ORIGINAL_ROOT = 'datasets/all/lsp_dataset_original'
+LSPET_ROOT = 'datasets/all/hr-lspet'
+MPII_ROOT = 'datasets/all/mpii_human_pose_v1'
+COCO_ROOT = 'datasets/all/coco'
+MPI_INF_3DHP_ROOT = 'datasets/all/mpi_inf_3dhp'
+PW3D_ROOT = 'datasets/all/3dpw'
+UPI_S1H_ROOT = 'datasets/all/upi-s1h'
 
 # Output folder to save test/train npz files
 DATASET_NPZ_PATH = 'data/dataset_extras'
@@ -53,10 +53,10 @@ DATASET_FOLDERS = {'h36m': H36M_ROOT,
                    'upi-s1h': UPI_S1H_ROOT,
                 }
 
-CUBE_PARTS_FILE = 'data/cube_parts.npy'
-JOINT_REGRESSOR_TRAIN_EXTRA = 'data/J_regressor_extra.npy'
-JOINT_REGRESSOR_H36M = 'data/J_regressor_h36m.npy'
-VERTEX_TEXTURE_FILE = 'data/vertex_texture.npy'
+CUBE_PARTS_FILE = 'data/cube_parts.npy' # for evaluation LSP
+JOINT_REGRESSOR_TRAIN_EXTRA = 'data/J_regressor_extra.npy' # Joints regressor for joints or landmarks that are not included in the standard set of SMPL joints.
+JOINT_REGRESSOR_H36M = 'data/J_regressor_h36m.npy' # Joints regressor reflecting the Human3.6M joints. Used for evaluation.
+VERTEX_TEXTURE_FILE = 'data/vertex_texture.npy' # for evaluation LSP
 STATIC_FITS_DIR = 'data/static_fits'
 SMPL_MEAN_PARAMS = 'data/smpl_mean_params.npz'
 SMPL_MODEL_DIR = 'data/smpl'
