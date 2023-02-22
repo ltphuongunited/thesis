@@ -35,7 +35,8 @@ def train_data(dataset_path, openpose_path, out_path, joints_idx, scaleFactor, e
     parts_, Ss_, openposes_ = [], [], []
 
     # training data
-    user_list = range(1,9)
+    # user_list = range(1,9)
+    user_list = [1]
     seq_list = range(1,3)
     vid_list = list(range(3)) + list(range(4,9))
 

@@ -123,3 +123,4 @@ data/*
 cdf38_1-dist/
 datasets/all
 neural_renderer/
+datasets/openpose

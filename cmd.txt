@@ -1,1 +1,4 @@
 . /home/tienthinh/phuong/SPIN/cdf38_1-dist/bin/definitions.B
+
+
+/home/tienthinh/phuong/openpose/build/examples/openpose/openpose.bin --image_dir /home/tienthinh/phuong/SPIN/datasets/all/H36M/images --write_json /home/tienthinh/phuong/SPIN/datasets/openpose/coco/ --display 0 --render_pose 0

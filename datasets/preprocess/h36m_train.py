@@ -7,6 +7,7 @@ import numpy as np
 import argparse
 from spacepy import pycdf
 from .read_openpose import read_openpose
+from tqdm import tqdm
 
 # Illustrative script for training data extraction
 # No SMPL parameters will be included in the .npz file.
@@ -38,7 +39,7 @@ def h36m_train_extract(dataset_path, openpose_path, out_path, extract_img=False,
         # go over all the sequences of each user
         seq_list = glob.glob(os.path.join(pose_path, '*.cdf'))
         seq_list.sort()
-        for seq_i in seq_list:
+        for seq_i in tqdm(seq_list):
 
             # sequence info
             seq_name = seq_i.split('/')[-1]
