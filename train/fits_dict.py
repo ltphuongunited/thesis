@@ -18,14 +18,11 @@ class FitsDict():
         # Load dictionary state
         for ds_name, ds in train_dataset.dataset_dict.items():
             try:
-                
                 dict_file = os.path.join(options.checkpoint_dir, ds_name + '_fits.npy')
-                print('-'*20, dict_file, '-'*20)
                 self.fits_dict[ds_name] = torch.from_numpy(np.load(dict_file))
             except IOError:
                 # Dictionary does not exist, so populate with static fits
                 dict_file = os.path.join(config.STATIC_FITS_DIR, ds_name + '_fits.npy')
-                print('-'*20, dict_file, '-'*20)
                 self.fits_dict[ds_name] = torch.from_numpy(np.load(dict_file))
 
     def save(self):

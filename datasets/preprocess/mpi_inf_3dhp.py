@@ -9,6 +9,9 @@ import scipy.io as sio
 import scipy.misc
 from .read_openpose import read_openpose
 import imageio
+from tqdm import tqdm
+
+list_img_mpi = np.load('/home/tienthinh/phuong/SPIN/image_mpi.npy')
 
 def read_calibration(calib_file, vid_list):
     Ks, Rs, Ts = [], [], []
@@ -35,15 +38,15 @@ def train_data(dataset_path, openpose_path, out_path, joints_idx, scaleFactor, e
     parts_, Ss_, openposes_ = [], [], []
 
     # training data
-    # user_list = range(1,9)
-    user_list = [1]
+    user_list = range(1,9)
+
     seq_list = range(1,3)
     vid_list = list(range(3)) + list(range(4,9))
 
     counter = 0
 
-    for user_i in user_list:
-        for seq_i in seq_list:
+    for user_i in tqdm(user_list):
+        for seq_i in tqdm(seq_list):
             seq_path = os.path.join(dataset_path,
                                     'S' + str(user_i),
                                     'Seq' + str(seq_i))
@@ -87,57 +90,58 @@ def train_data(dataset_path, openpose_path, out_path, joints_idx, scaleFactor, e
                         imgname = os.path.join(imgs_path,
                             'frame_%06d.jpg' % frame)
                         # save image
-                        cv2.imwrite(imgname, image)
+                        if imgname in list_img_mpi:
+                            cv2.imwrite(imgname, image)
 
-                # per frame
-                cam_aa = cv2.Rodrigues(Rs[j])[0].T[0]
-                pattern = os.path.join(imgs_path, '*.jpg')
-                img_list = glob.glob(pattern)
-                for i, img_i in enumerate(img_list):
+    #             # per frame
+    #             cam_aa = cv2.Rodrigues(Rs[j])[0].T[0]
+    #             pattern = os.path.join(imgs_path, '*.jpg')
+    #             img_list = glob.glob(pattern)
+    #             for i, img_i in enumerate(img_list):
 
-                    # for each image we store the relevant annotations
-                    img_name = img_i.split('/')[-1]
-                    img_view = os.path.join('S' + str(user_i),
-                                            'Seq' + str(seq_i),
-                                            'imageFrames',
-                                            'video_' + str(vid_i),
-                                            img_name)
-                    joints = np.reshape(annot2[vid_i][0][i], (28, 2))[joints17_idx]
-                    S17 = np.reshape(annot3[vid_i][0][i], (28, 3))/1000
-                    S17 = S17[joints17_idx] - S17[4] # 4 is the root
-                    bbox = [min(joints[:,0]), min(joints[:,1]),
-                            max(joints[:,0]), max(joints[:,1])]
-                    center = [(bbox[2]+bbox[0])/2, (bbox[3]+bbox[1])/2]
-                    scale = scaleFactor*max(bbox[2]-bbox[0], bbox[3]-bbox[1])/200
+    #                 # for each image we store the relevant annotations
+    #                 img_name = img_i.split('/')[-1]
+    #                 img_view = os.path.join('S' + str(user_i),
+    #                                         'Seq' + str(seq_i),
+    #                                         'imageFrames',
+    #                                         'video_' + str(vid_i),
+    #                                         img_name)
+    #                 joints = np.reshape(annot2[vid_i][0][i], (28, 2))[joints17_idx]
+    #                 S17 = np.reshape(annot3[vid_i][0][i], (28, 3))/1000
+    #                 S17 = S17[joints17_idx] - S17[4] # 4 is the root
+    #                 bbox = [min(joints[:,0]), min(joints[:,1]),
+    #                         max(joints[:,0]), max(joints[:,1])]
+    #                 center = [(bbox[2]+bbox[0])/2, (bbox[3]+bbox[1])/2]
+    #                 scale = scaleFactor*max(bbox[2]-bbox[0], bbox[3]-bbox[1])/200
 
-                    # check that all joints are visible
-                    x_in = np.logical_and(joints[:, 0] < w, joints[:, 0] >= 0)
-                    y_in = np.logical_and(joints[:, 1] < h, joints[:, 1] >= 0)
-                    ok_pts = np.logical_and(x_in, y_in)
-                    if np.sum(ok_pts) < len(joints_idx):
-                        continue
+    #                 # check that all joints are visible
+    #                 x_in = np.logical_and(joints[:, 0] < w, joints[:, 0] >= 0)
+    #                 y_in = np.logical_and(joints[:, 1] < h, joints[:, 1] >= 0)
+    #                 ok_pts = np.logical_and(x_in, y_in)
+    #                 if np.sum(ok_pts) < len(joints_idx):
+    #                     continue
                         
-                    part = np.zeros([24,3])
-                    part[joints_idx] = np.hstack([joints, np.ones([17,1])])
-                    # json_file = os.path.join(openpose_path, 'mpi_inf_3dhp',
-                    #     img_view.replace('.jpg', '_keypoints.json'))
-                    # openpose = read_openpose(json_file, part, 'mpi_inf_3dhp')
+    #                 part = np.zeros([24,3])
+    #                 part[joints_idx] = np.hstack([joints, np.ones([17,1])])
+    #                 json_file = os.path.join(openpose_path, 'mpi_inf_3dhp',
+    #                     img_view.replace('.jpg', '_keypoints.json'))
+    #                 openpose = read_openpose(json_file, part, 'mpi_inf_3dhp')
 
-                    S = np.zeros([24,4])
-                    S[joints_idx] = np.hstack([S17, np.ones([17,1])])
+    #                 S = np.zeros([24,4])
+    #                 S[joints_idx] = np.hstack([S17, np.ones([17,1])])
 
-                    # because of the dataset size, we only keep every 10th frame
-                    counter += 1
-                    if counter % 10 != 1:
-                        continue
+    #                 # because of the dataset size, we only keep every 10th frame
+    #                 counter += 1
+    #                 if counter % 10 != 1:
+    #                     continue
 
-                    # store the data
-                    # imgnames_.append(img_view)
-                    # centers_.append(center)
-                    # scales_.append(scale)
-                    # parts_.append(part)
-                    # Ss_.append(S)
-                    # openposes_.append(openpose)
+    #                 # store the data
+    #                 imgnames_.append(img_view)
+    #                 centers_.append(center)
+    #                 scales_.append(scale)
+    #                 parts_.append(part)
+    #                 Ss_.append(S)
+    #                 openposes_.append(openpose)
                        
     # # store the data struct
     # if not os.path.isdir(out_path):
