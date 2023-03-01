@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import torchvision.models.resnet as resnet
+from torchvision.models import resnet50, ResNet50_Weights
 import numpy as np
 import math
 from utils.geometry import rot6d_to_rotmat
@@ -182,7 +182,8 @@ def hmr_ktd(smpl_mean_params, pretrained=True, **kwargs):
     """
     model = HMR_KTD(Bottleneck, [3, 4, 6, 3],  smpl_mean_params, **kwargs)
     if pretrained:
-        resnet_imagenet = resnet.resnet50(pretrained=True)
+        # resnet_imagenet = resnet.resnet50(pretrained=True)
+        resnet_imagenet = resnet50(weights=ResNet50_Weights.DEFAULT)
         model.load_state_dict(resnet_imagenet.state_dict(),strict=False)
     return model
 
