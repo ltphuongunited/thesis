@@ -217,11 +217,16 @@ class Trainer(BaseTrainer):
         opt_betas[(opt_betas.abs() > 3).any(dim=-1)] = 0.
 
         # Replace the optimized parameters with the ground truth parameters, if available
-        opt_vertices[has_smpl, :, :] = gt_vertices[has_smpl, :, :]
-        opt_cam_t[has_smpl, :] = gt_cam_t[has_smpl, :]
-        opt_joints[has_smpl, :, :] = gt_model_joints[has_smpl, :, :]
-        opt_pose[has_smpl, :] = gt_pose[has_smpl, :]
-        opt_betas[has_smpl, :] = gt_betas[has_smpl, :]
+        # opt_vertices[has_smpl, :, :] = gt_vertices[has_smpl, :, :]
+        # opt_cam_t[has_smpl, :] = gt_cam_t[has_smpl, :]
+        # opt_joints[has_smpl, :, :] = gt_model_joints[has_smpl, :, :]
+        # opt_pose[has_smpl, :] = gt_pose[has_smpl, :]
+        # opt_betas[has_smpl, :] = gt_betas[has_smpl, :]
+        opt_vertices[has_smpl.bool(), :, :] = gt_vertices[has_smpl.bool(), :, :]
+        opt_cam_t[has_smpl.bool(), :] = gt_cam_t[has_smpl.bool(), :]
+        opt_joints[has_smpl.bool(), :, :] = gt_model_joints[has_smpl.bool(), :, :]
+        opt_pose[has_smpl.bool(), :] = gt_pose[has_smpl.bool(), :]
+        opt_betas[has_smpl.bool(), :] = gt_betas[has_smpl.bool(), :]
 
         # Assert whether a fit is valid by comparing the joint loss with the threshold
         valid_fit = (opt_joint_loss < self.options.smplify_threshold).to(self.device)

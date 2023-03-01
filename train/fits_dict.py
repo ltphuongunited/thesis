@@ -63,10 +63,14 @@ class FitsDict():
         """flip SMPL pose parameters"""
         is_flipped = is_flipped.byte()
         pose_f = pose.clone()
-        pose_f[is_flipped, :] = pose[is_flipped][:, self.flipped_parts]
+        # pose_f[is_flipped, :] = pose[is_flipped][:, self.flipped_parts]
+        pose_f[is_flipped.bool(), :] = pose[is_flipped.bool()][:, self.flipped_parts]
+
         # we also negate the second and the third dimension of the axis-angle representation
-        pose_f[is_flipped, 1::3] *= -1
-        pose_f[is_flipped, 2::3] *= -1
+        # pose_f[is_flipped, 1::3] *= -1
+        # pose_f[is_flipped, 2::3] *= -1
+        pose_f[is_flipped.bool(), 1::3] *= -1
+        pose_f[is_flipped.bool(), 2::3] *= -1
         return pose_f
 
     def rotate_pose(self, pose, rot):

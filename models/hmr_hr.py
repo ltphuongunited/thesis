@@ -33,7 +33,7 @@ class HMR_HR(nn.Module):
         curr_dir = osp.dirname(osp.abspath(__file__))
         # config_file = osp.join(curr_dir, "/home/tienthinh/phuong/SPIN/models/backbones/hrnet/models/cls_hrnet_w48_sgd_lr5e-2_wd1e-4_bs32_x100.yaml")
         # update_config(cfg, config_file)
-        update_config(cfg, '/home/tienthinh/phuong/SPIN/models/backbones/hrnet/models/cls_hrnet_w30_sgd_lr5e-2_wd1e-4_bs32_x100.yaml')
+        update_config(cfg, '/home/tienthinh/phuong/SPIN/models/backbones/hrnet/models/cls_hrnet_w18_sgd_lr5e-2_wd1e-4_bs32_x100.yaml')
         self.encoder = HighResolutionNet(cfg)
 
         npose = 24 * 6
@@ -112,4 +112,6 @@ def hmr_hr(smpl_mean_params, pretrained=True, **kwargs):
     model = HMR_HR(smpl_mean_params, **kwargs)
     # if pretrained:
     #     model.load_state_dict('/home/tienthinh/phuong/SPIN/models/backbones/hrnet/hrnetv2_w48_imagenet_pretrained.pth',strict=False)
+    # resnet_imagenet = resnet50(weights=ResNet50_Weights.DEFAULT)
+    # model.load_state_dict(resnet_imagenet.state_dict(),strict=False)
     return model
