@@ -1,7 +1,7 @@
 torch
 torchgeometry
 torchvision
-numpy
+numpy==1.19.5
 opencv-python
 pyopengl
 pyrender
