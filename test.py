@@ -1,6 +1,16 @@
 import numpy as np
 
-data = np.load('/home/tienthinh/phuong/SPIN/data/smpl_mean_params.npz')
+data = np.load('cliffGT_v1/coco2014part_cliffGT.npz')
+a=5
+# print(data['S'][a:a+3])
+for key in data.keys():
+    print("variable name:", key          , end="  ")
+    print("type: "+ str(data[key].dtype) , end="  ")
+    print("shape:"+ str(data[key].shape))
+
+print('*'*50)
+data = np.load('data/dataset_extras/coco_2014_train.npz')
+# print(data['S'][a:a+3])
 for key in data.keys():
     print("variable name:", key          , end="  ")
     print("type: "+ str(data[key].dtype) , end="  ")
