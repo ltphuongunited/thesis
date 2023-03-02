@@ -24,7 +24,6 @@ from models.backbones.hrnet.cls_hrnet import HighResolutionNet
 from models.backbones.hrnet.hrnet_config import cfg
 from models.backbones.hrnet.hrnet_config import update_config
 
-
 class HMR_HR(nn.Module):
     """ SMPL Iterative Regressor with ResNet50 backbone"""
 
@@ -33,7 +32,7 @@ class HMR_HR(nn.Module):
         curr_dir = osp.dirname(osp.abspath(__file__))
         # config_file = osp.join(curr_dir, "/home/tienthinh/phuong/SPIN/models/backbones/hrnet/models/cls_hrnet_w48_sgd_lr5e-2_wd1e-4_bs32_x100.yaml")
         # update_config(cfg, config_file)
-        update_config(cfg, '/home/tienthinh/phuong/SPIN/models/backbones/hrnet/models/cls_hrnet_w18_sgd_lr5e-2_wd1e-4_bs32_x100.yaml')
+        update_config(cfg, 'models/backbones/hrnet/models/cls_hrnet_w18_sgd_lr5e-2_wd1e-4_bs32_x100.yaml')
         self.encoder = HighResolutionNet(cfg)
 
         npose = 24 * 6
@@ -109,9 +108,11 @@ def hmr_hr(smpl_mean_params, pretrained=True, **kwargs):
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
+    global cf
     model = HMR_HR(smpl_mean_params, **kwargs)
-    # if pretrained:
-    #     model.load_state_dict('/home/tienthinh/phuong/SPIN/models/backbones/hrnet/hrnetv2_w48_imagenet_pretrained.pth',strict=False)
-    # resnet_imagenet = resnet50(weights=ResNet50_Weights.DEFAULT)
-    # model.load_state_dict(resnet_imagenet.state_dict(),strict=False)
+    if pretrained:
+        update_config(cfg, 'models/backbones/hrnet/models/cls_hrnet_w18_sgd_lr5e-2_wd1e-4_bs32_x100.yaml')
+        hr_imagenet = HighResolutionNet(cfg)
+        hr_imagenet.init_weights('models/backbones/hrnet/hrnetv2_w18_imagenet_pretrained.pth')
+        model.load_state_dict(hr_imagenet.state_dict(),strict=False)
     return model

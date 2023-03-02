@@ -86,9 +86,10 @@ class BaseTrainer(object):
             # just iterate over the dataset as usual
             self.checkpoint=None
             # save checkpoint after each epoch
-            if (epoch+1) % 10 == 0:
+            if (epoch+1) % 1 == 0:
                 # self.saver.save_checkpoint(self.models_dict, self.optimizers_dict, epoch+1, 0, self.step_count)
                 self.saver.save_checkpoint(self.models_dict, self.optimizers_dict, epoch+1, 0, self.options.batch_size, None, self.step_count)
+                tqdm.write('Checkpoint saved after epoch')
         return
 
     # The following methods (with the possible exception of test) have to be implemented in the derived classes
