@@ -37,17 +37,17 @@ def body_fitting_loss(body_pose, betas, model_joints, camera_t, camera_center,
     projected_joints = perspective_projection(model_joints, rotation, camera_t,
                                               focal_length, camera_center)
 
-    # Weighted robust reprojection error
+    # Weighted robust reprojection error - E joint weights
     reprojection_error = gmof(projected_joints - joints_2d, sigma)
     reprojection_loss = (joints_conf ** 2) * reprojection_error.sum(dim=-1)
 
-    # Pose prior loss
+    # Pose prior loss - E theta 
     pose_prior_loss = (pose_prior_weight ** 2) * pose_prior(body_pose, betas)
 
-    # Angle prior for knees and elbows
+    # Angle prior for knees and elbows - E elbows & knees
     angle_prior_loss = (angle_prior_weight ** 2) * angle_prior(body_pose).sum(dim=-1)
 
-    # Regularizer to prevent betas from taking large values
+    # Regularizer to prevent betas from taking large values - E beta
     shape_prior_loss = (shape_prior_weight ** 2) * (betas ** 2).sum(dim=-1)
 
     total_loss = reprojection_loss.sum(dim=-1) + pose_prior_loss + angle_prior_loss + shape_prior_loss

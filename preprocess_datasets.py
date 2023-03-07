@@ -47,7 +47,7 @@ if __name__ == '__main__':
     if args.eval_files:
         pass
         # Human3.6M preprocessing (two protocols)
-        # h36m_extract(cfg.H36M_ROOT, out_path, protocol=1, extract_img=True)
+        h36m_extract(cfg.H36M_ROOT, out_path, protocol=1, extract_img=True)
         # h36m_extract(cfg.H36M_ROOT, out_path, protocol=2, extract_img=False)
         
         # # MPI-INF-3DHP dataset preprocessing (test set)

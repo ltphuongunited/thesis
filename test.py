@@ -1,28 +1,49 @@
 import numpy as np
+import torch
+import json
 
-data = np.load('cliffGT_v1/coco2014part_cliffGT.npz')
-a=5
-# print(data['S'][a:a+3])
-for key in data.keys():
+# f = open('h36m/Human36M_subject1_smpl_param.json')
+  
+# returns JSON object as 
+# a dictionary
+# data = json.load(f)
+# print(data['15'].keys())
+
+# a = np.load('data/static_fits/coco_fits.npy')
+# print(a.shape)
+data1 = np.load('data/dataset_extras/mpii_train.npz')
+# data2 = np.load('data/dataset_extras/coco_2014_train.npz')
+# data3 = np.load('data/dataset_extras/coco_2014_train_cliff.npz')
+
+for key in data1.keys():
     print("variable name:", key          , end="  ")
-    print("type: "+ str(data[key].dtype) , end="  ")
-    print("shape:"+ str(data[key].shape))
+    print("type: "+ str(data1[key].dtype) , end="  ")
+    print("shape:"+ str(data1[key].shape))
 
-print('*'*50)
-data = np.load('data/dataset_extras/coco_2014_train.npz')
-# print(data['S'][a:a+3])
-for key in data.keys():
-    print("variable name:", key          , end="  ")
-    print("type: "+ str(data[key].dtype) , end="  ")
-    print("shape:"+ str(data[key].shape))
-# # print(data.shape)
-# a = data['imgname']
-# a = list(map(lambda x: 'datasets/all/mpi_inf_3dhp/' + x, a))
-# np.save('image_mpi.npy', a)
+# print('*'*50)
 
-# a = np.load('image_mpi.npy')
-# temp = 'datasets/all/mpi_inf_3dhp/S1/Seq1/imageFrames/video_0/frame_000001.jpg'
+# for key in data2.keys():
+#     print("variable name:", key          , end="  ")
+#     print("type: "+ str(data2[key].dtype) , end="  ")
+#     print("shape:"+ str(data2[key].shape))
 
-# print(a[0])
-# print(temp)
-# print(temp in a)
+# print('*'*50)
+
+# for key in data3.keys():
+#     print("variable name:", key          , end="  ")
+#     print("type: "+ str(data3[key].dtype) , end="  ")
+#     print("shape:"+ str(data3[key].shape))
+
+# np.savez('data/dataset_extras/coco_2014_train_cliff.npz',
+#                     imgname=data1['imgname'],
+#                     center=data1['center'],
+#                     scale=data1['scale'],
+#                     part=data1['part'],
+#                     annot_id=data1['annot_id'],
+#                     pose=data1['pose'],
+#                     shape=data1['shape'],
+#                     has_smpl=data1['has_smpl'],
+#                     global_t=data1['global_t'],
+#                     focal_l=data1['focal_l'],
+#                     S=data1['S'],
+#                     openpose=data2['openpose'])

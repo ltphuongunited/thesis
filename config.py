@@ -34,7 +34,8 @@ DATASET_FILES = [ {'h36m-p1': join(DATASET_NPZ_PATH, 'h36m_valid_protocol1.npz')
                   {'h36m': join(DATASET_NPZ_PATH, 'h36m_train.npz'),
                    'lsp-orig': join(DATASET_NPZ_PATH, 'lsp_dataset_original_train.npz'),
                    'mpii': join(DATASET_NPZ_PATH, 'mpii_train.npz'),
-                   'coco': join(DATASET_NPZ_PATH, 'coco_2014_train.npz'),
+                  #  'coco': join(DATASET_NPZ_PATH, 'coco_2014_train.npz'),
+                   'coco': join(DATASET_NPZ_PATH, 'coco_2014_train_cliff.npz'),                   
                    'lspet': join(DATASET_NPZ_PATH, 'hr-lspet_train.npz'),
                    'mpi-inf-3dhp': join(DATASET_NPZ_PATH, 'mpi_inf_3dhp_train.npz')
                   }

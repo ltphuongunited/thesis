@@ -157,19 +157,24 @@ class HMR_KTD(nn.Module):
         xf = self.avgpool(x4)
         xf = xf.view(xf.size(0), -1)
 
-        xc = self.fc1(xf)
-        xc = self.drop1(xc)
-        xc = self.fc2(xc)
-        xc = self.drop2(xc)
-        pred_shape = self.decshape(xc)
-        pred_cam = self.deccam(xc)
-        
-        pose = []
-        for ancestor_idx, reg in zip(ANCESTOR_INDEX, self.joint_regs):
-            ances = torch.cat([xc] + [pose[i] for i in ancestor_idx], dim=1)
-            pose.append(reg(ances))
+        pred_pose = init_pose
+        pred_shape = init_shape
+        pred_cam = init_cam
 
-        pred_pose = torch.cat(pose, dim=1)
+        for i in range(n_iter):
+            xc = self.fc1(xf)
+            xc = self.drop1(xc)
+            xc = self.fc2(xc)
+            xc = self.drop2(xc)
+            pred_shape = self.decshape(xc) + pred_shape
+            pred_cam = self.deccam(xc) + pred_cam
+            
+            pose = []
+            for ancestor_idx, reg in zip(ANCESTOR_INDEX, self.joint_regs):
+                ances = torch.cat([xc] + [pose[i] for i in ancestor_idx], dim=1)
+                pose.append(reg(ances))
+
+            pred_pose = torch.cat(pose, dim=1) + pred_pose
         
         pred_rotmat = rot6d_to_rotmat(pred_pose).view(batch_size, 24, 3, 3)
 
