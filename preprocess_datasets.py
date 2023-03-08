@@ -27,10 +27,9 @@ if __name__ == '__main__':
     openpose_path = cfg.OPENPOSE_PATH
 
     if args.train_files:
-        pass
-        # h36m_train_extract(cfg.H36M_ROOT, openpose_path, out_path, extract_img=True)
+        h36m_train_extract(cfg.H36M_ROOT, openpose_path, out_path, extract_img=True)
         # # MPI-INF-3DHP dataset preprocessing (training set)
-        mpi_inf_3dhp_extract(cfg.MPI_INF_3DHP_ROOT, openpose_path, out_path, 'train', extract_img=True, static_fits=cfg.STATIC_FITS_DIR)
+        # mpi_inf_3dhp_extract(cfg.MPI_INF_3DHP_ROOT, openpose_path, out_path, 'train', extract_img=True, static_fits=cfg.STATIC_FITS_DIR)
 
         # # LSP dataset original preprocessing (training set)
         # lsp_dataset_original_extract(cfg.LSP_ORIGINAL_ROOT, openpose_path, out_path)
@@ -48,7 +47,7 @@ if __name__ == '__main__':
         pass
         # Human3.6M preprocessing (two protocols)
         h36m_extract(cfg.H36M_ROOT, out_path, protocol=1, extract_img=True)
-        # h36m_extract(cfg.H36M_ROOT, out_path, protocol=2, extract_img=False)
+        h36m_extract(cfg.H36M_ROOT, out_path, protocol=2, extract_img=False)
         
         # # MPI-INF-3DHP dataset preprocessing (test set)
         # mpi_inf_3dhp_extract(cfg.MPI_INF_3DHP_ROOT, openpose_path, out_path, 'test',extract_img=True)

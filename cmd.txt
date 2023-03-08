@@ -2,3 +2,5 @@
 
 
 /home/tienthinh/phuong/openpose/build/examples/openpose/openpose.bin --image_dir /home/tienthinh/phuong/SPIN/datasets/all/H36M/images --write_json /home/tienthinh/phuong/SPIN/datasets/openpose/coco/ --display 0 --render_pose 0
+
+/home/tienthinh/phuong/openpose/build/examples/openpose/openpose.bin --image_dir /home/tienthinh/phuong/SPIN/datasets/all/H36M/images --write_json /home/tienthinh/phuong/SPIN/datasets/openpose/coco/ --no_gui_verbose --render_pose 0
