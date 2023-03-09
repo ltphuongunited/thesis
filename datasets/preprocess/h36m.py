@@ -7,6 +7,7 @@ import numpy as np
 import argparse
 from spacepy import pycdf
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 def h36m_extract(dataset_path, out_path, protocol=1, extract_img=False):
 
@@ -21,7 +22,7 @@ def h36m_extract(dataset_path, out_path, protocol=1, extract_img=False):
     user_list = [9, 11]
 
     # go over each user
-    for user_i in user_list:
+    for user_i in tqdm(user_list):
         user_name = 'S%d' % user_i
         # path with GT bounding boxes
         bbox_path = os.path.join(dataset_path, user_name, 'MySegmentsMat', 'ground_truth_bb')
@@ -34,7 +35,7 @@ def h36m_extract(dataset_path, out_path, protocol=1, extract_img=False):
         seq_list = glob.glob(os.path.join(pose_path, '*.cdf'))
         seq_list.sort()
 
-        for seq_i in seq_list:
+        for seq_i in tqdm(seq_list):
 
             # sequence info
             seq_name = seq_i.split('/')[-1]

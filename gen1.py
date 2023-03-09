@@ -32,14 +32,16 @@ def process_image(img_file, openpose_file, input_res=224):
     """
     normalize_img = Normalize(mean=constants.IMG_NORM_MEAN, std=constants.IMG_NORM_STD)
     img = cv2.imread(img_file)[:,:,::-1].copy() # PyTorch does not support negative stride at the moment
-    if openpose_file is None:
+
+    try:
+        center, scale = bbox_from_openpose(openpose_file)
+    except:
         # Assume that the person is centerered in the image
         height = img.shape[0]
         width = img.shape[1]
         center = np.array([width // 2, height // 2])
         scale = max(height, width) / 200
-    else:
-        center, scale = bbox_from_openpose(openpose_file)
+
     img = crop(img, center, scale, (input_res, input_res))
     img = img.astype(np.float32) / 255.
     img = torch.from_numpy(img).permute(2,0,1)
@@ -64,10 +66,10 @@ if __name__ == '__main__':
     data_train = np.load('data/dataset_extras/h36m_train.npz')
     length = data_train['imgname'].shape[0]
     result = []
-    for i in tqdm(range(length)):
+    for i in tqdm(range(length)[:38766]):
         imgname = os.path.join('datasets/all/H36M',data_train['imgname'][i])
         openpose_file = os.path.join('datasets/openpose', 'coco', data_train['imgname'][i].replace('.jpg', '_keypoints.json')).replace('/images','')
-        
+            
         img, norm_img = process_image(imgname, openpose_file, input_res=constants.IMG_RES)
         with torch.no_grad():
             pred_rotmat, pred_betas, pred_camera = model(norm_img.to(device))
@@ -81,4 +83,4 @@ if __name__ == '__main__':
             opt = np.concatenate((pred_pose, pred_betas))
             result.append(opt)
     
-    np.save('h36m_fits.npy', result)
+    np.save('h36m_fits_1.npy', result)
