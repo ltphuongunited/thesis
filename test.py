@@ -12,7 +12,7 @@ import json
 # a = np.load('data/static_fits/coco_fits.npy')
 # print(a.shape)
 # print(sum(a[0][:72] < 0))
-data1 = np.load('data/smpl_mean_params.npz')
+data1 = np.load('data/dataset_extras/3dpw_test.npz')
 # data2 = np.load('data/dataset_extras/coco_2014_train.npz')
 # data3 = np.load('data/dataset_extras/coco_2014_train_cliff.npz')
 
