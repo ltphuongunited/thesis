@@ -46,11 +46,19 @@ class MixedDataset(torch.utils.data.Dataset):
         Data distribution inside each batch:
         30% H36M - 60% ITW - 10% MPI-INF
         """
-        self.partition = [.3, .6*len(self.datasets[1])/length_itw,
+        self.partition = [.3, 
+                          .6*len(self.datasets[1])/length_itw,
                           .6*len(self.datasets[2])/length_itw,
                           .6*len(self.datasets[3])/length_itw, 
                           .6*len(self.datasets[4])/length_itw,
                           0.1]
+        # self.partition = [
+        #                     .5,
+        #                     .3 * len(self.datasets[1]) / length_itw,
+        #                     .3 * len(self.datasets[2]) / length_itw,
+        #                     .3 * len(self.datasets[3]) / length_itw,
+        #                     .3 * len(self.datasets[4]) / length_itw,
+        #                     0.2]
         self.partition = np.array(self.partition).cumsum()
 
     def __getitem__(self, index):
@@ -61,4 +69,3 @@ class MixedDataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return self.length
-

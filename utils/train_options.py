@@ -47,7 +47,7 @@ class TrainOptions():
         train.add_argument('--gt_train_weight', default=1., help='Weight for GT keypoints during training') 
         train.add_argument('--run_smplify', default=False, action='store_true', help='Run SMPLify during training') 
         train.add_argument('--smplify_threshold', type=float, default=100., help='Threshold for ignoring SMPLify fits during training') 
-        train.add_argument('--num_smplify_iters', default=100, type=int, help='Number of SMPLify iterations') 
+        train.add_argument('--num_smplify_iters', default=30, type=int, help='Number of SMPLify iterations') 
 
         shuffle_train = train.add_mutually_exclusive_group()
         shuffle_train.add_argument('--shuffle_train', dest='shuffle_train', action='store_true', help='Shuffle training data')

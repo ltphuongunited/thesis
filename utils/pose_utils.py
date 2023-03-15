@@ -72,4 +72,4 @@ def reconstruction_error(S1, S2, reduction='mean'):
         re = re.mean()
     elif reduction == 'sum':
         re = re.sum()
-    return re
+    return re, S1_hat
