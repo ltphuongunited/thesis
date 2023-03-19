@@ -28,6 +28,7 @@ class TrainOptions():
         io.add_argument('--pretrained_checkpoint', default=None, help='Load a pretrained checkpoint at the beginning training') 
 
         train = self.parser.add_argument_group('Training Options')
+        train.add_argument("--eval_dataset", default='3dpw', help="Validate dataset")
         train.add_argument('--num_epochs', type=int, default=50, help='Total number of training epochs')
         train.add_argument("--lr", type=float, default=5e-5, help="Learning rate")
         train.add_argument('--batch_size', type=int, default=64, help='Batch size')

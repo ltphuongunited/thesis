@@ -7,6 +7,8 @@ import scipy.misc
 import cv2
 import skimage.transform
 import constants
+from skimage.transform import resize
+from PIL import Image
 
 def get_transform(center, scale, res, rot=0):
     """Generate transformation matrix."""
@@ -103,7 +105,8 @@ def uncrop(img, center, scale, orig_shape, rot=0, is_rgb=True):
     # Range to sample from original image
     old_x = max(0, ul[0]), min(orig_shape[1], br[0])
     old_y = max(0, ul[1]), min(orig_shape[0], br[1])
-    img = scipy.misc.imresize(img, crop_shape, interp='nearest')
+    # img = scipy.misc.imresize(img, crop_shape, interp='nearest')
+    img = np.array(Image.fromarray(img.astype(np.uint8)).resize(crop_shape))
     new_img[old_y[0]:old_y[1], old_x[0]:old_x[1]] = img[new_y[0]:new_y[1], new_x[0]:new_x[1]]
     return new_img
 

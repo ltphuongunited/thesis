@@ -6,6 +6,7 @@ import torch
 from tqdm import tqdm
 tqdm.monitor_interval = 0
 from torch.utils.tensorboard import SummaryWriter
+from torch.utils.data import DataLoader
 
 from utils import CheckpointDataLoader, CheckpointSaver
 
@@ -54,6 +55,14 @@ class BaseTrainer(object):
                                                      num_workers=self.options.num_workers,
                                                      pin_memory=self.options.pin_memory,
                                                      shuffle=self.options.shuffle_train)
+            
+            valid_loader = DataLoader(
+                    dataset=self.valid_ds,
+                    batch_size=self.options.batch_size,
+                    shuffle=False,
+                    num_workers=self.options.num_workers,
+                    pin_memory=self.options.pin_memory
+                )
 
             # Iterate over all batches in an epoch
             for step, batch in enumerate(tqdm(train_data_loader, desc='Epoch '+str(epoch),

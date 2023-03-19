@@ -78,34 +78,34 @@ def h36m_extract(dataset_path, out_path, protocol=1, extract_img=False):
                         img_out = os.path.join(imgs_path, imgname)
                         cv2.imwrite(img_out, image)
 
-                    # read GT bounding box
-                    mask = bbox_h5py[bbox_h5py['Masks'][frame_i,0]].value.T
-                    ys, xs = np.where(mask==1)
-                    bbox = np.array([np.min(xs), np.min(ys), np.max(xs)+1, np.max(ys)+1])
-                    center = [(bbox[2]+bbox[0])/2, (bbox[3]+bbox[1])/2]
-                    scale = 0.9*max(bbox[2]-bbox[0], bbox[3]-bbox[1])/200.
+    #                 # read GT bounding box
+    #                 mask = bbox_h5py[bbox_h5py['Masks'][frame_i,0]].value.T
+    #                 ys, xs = np.where(mask==1)
+    #                 bbox = np.array([np.min(xs), np.min(ys), np.max(xs)+1, np.max(ys)+1])
+    #                 center = [(bbox[2]+bbox[0])/2, (bbox[3]+bbox[1])/2]
+    #                 scale = 0.9*max(bbox[2]-bbox[0], bbox[3]-bbox[1])/200.
 
-                    # read GT 3D pose
-                    Sall = np.reshape(poses_3d[frame_i,:], [-1,3])/1000.
-                    S17 = Sall[h36m_idx]
-                    S17 -= S17[0] # root-centered
-                    S24 = np.zeros([24,4])
-                    S24[global_idx, :3] = S17
-                    S24[global_idx, 3] = 1
+    #                 # read GT 3D pose
+    #                 Sall = np.reshape(poses_3d[frame_i,:], [-1,3])/1000.
+    #                 S17 = Sall[h36m_idx]
+    #                 S17 -= S17[0] # root-centered
+    #                 S24 = np.zeros([24,4])
+    #                 S24[global_idx, :3] = S17
+    #                 S24[global_idx, 3] = 1
 
-                    # store data
-                    imgnames_.append(os.path.join('images', imgname))
-                    centers_.append(center)
-                    scales_.append(scale)
-                    Ss_.append(S24)
+    #                 # store data
+    #                 imgnames_.append(os.path.join('images', imgname))
+    #                 centers_.append(center)
+    #                 scales_.append(scale)
+    #                 Ss_.append(S24)
 
-    # store the data struct
-    if not os.path.isdir(out_path):
-        os.makedirs(out_path)
-    out_file = os.path.join(out_path, 
-        'h36m_valid_protocol%d.npz' % protocol)
-    np.savez(out_file, imgname=imgnames_,
-                       center=centers_,
-                       scale=scales_,
-                       S=Ss_)
-    print('Done')
+    # # store the data struct
+    # if not os.path.isdir(out_path):
+    #     os.makedirs(out_path)
+    # out_file = os.path.join(out_path, 
+    #     'h36m_valid_protocol%d.npz' % protocol)
+    # np.savez(out_file, imgname=imgnames_,
+    #                    center=centers_,
+    #                    scale=scales_,
+    #                    S=Ss_)
+    # print('Done')

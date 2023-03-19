@@ -63,7 +63,7 @@ Besides the demo code, we also provide code to evaluate our models on the datase
 
 Example usage:
 ```
-python3 eval.py --checkpoint=data/model_checkpoint.pt --dataset=h36m-p1 --log_freq=20
+python3 eval_pve.py --checkpoint=data/model_checkpoint.pt --dataset=h36m-p1 --log_freq=20
 ```
 Running the above command will compute the MPJPE and Reconstruction Error on the Human3.6M dataset (Protocol I). The ```--dataset``` option can take different values based on the type of evaluation you want to perform:
 1. Human3.6M Protocol 1 ```--dataset=h36m-p1```

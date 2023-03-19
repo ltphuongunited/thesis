@@ -14,9 +14,9 @@ from tqdm import tqdm
 # a = np.load('data_pymaf/static_Fits/h36m.npy')
 # print(a[10000][:10])
 # print(sum(a[0][:72] < 0))
-data1 = np.load('data/dataset_extras/3dpw_train.npz')
-# data2 = np.load('h36m_mosh_train.npz')
-# # data3 = np.load('data/dataset_extras/coco_2014_train_cliff.npz')
+data1 = np.load('data/dataset_extras/h36m_valid_protocol1_newpath.npz')
+# data2 = np.load('/home/tienthinh/phuong/SPIN/data/dataset_extras/h36m_mosh_train.npz')
+# data3 = np.load('data/dataset_extras/h36m_valid_protocol2_newpath.npz')
 print(data1['imgname'][100])
 for key in data1.keys():
     print("variable name:", key          , end="  ")
@@ -31,14 +31,17 @@ for key in data1.keys():
 #     print("type: "+ str(data2[key].dtype) , end="  ")
 #     print("shape:"+ str(data2[key].shape))
 
+# print('='*50)
+# print(data3['imgname'][100])
+# for key in data3.keys():
+#     print("variable name:", key          , end="  ")
+#     print("type: "+ str(data3[key].dtype) , end="  ")
+#     print("shape:"+ str(data3[key].shape))
 
-# np.savez('h36m_mosh_train.npz',
+# np.savez('h36m_valid_protocol2_newpath.npz',
 #                     imgname=np.array(list(map(lambda x: x.split('/')[-1], data1['imgname']))),
 #                     center=data1['center'],
 #                     scale=data1['scale'],
-#                     part=data1['part'],
-#                     pose=data1['pose'],
-#                     shape=data1['shape'],
 #                     S=data1['S'])
 
 # e = []
