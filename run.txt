@@ -1,0 +1,19 @@
+curl -L 'https://drive.google.com/uc?export=download&id=1PMhPo9frXZKc9LL88DbqYxTkNLwHiV2t&confirm=t' > data.zip
+
+
+curl -L 'https://drive.google.com/uc?export=download&id=1pKkX3q_TCOQKbOiq9oja-9RZHOewnV9r&confirm=t' > h36m_1.tar.gz
+curl -L 'https://drive.google.com/uc?export=download&id=1-4KqE_gnvA5_RFXWKnRO5GU7zquVYQ2G&confirm=t' > h36m_2.tar.gz
+curl -L 'https://drive.google.com/uc?export=download&id=1-B3NCE7SdVseV1KTYyaKlqSvh1B9EqqD&confirm=t' > h36m_3.tar.gz
+curl -L 'https://drive.google.com/uc?export=download&id=1-BbPSK6kVQkd84O6YIMetNPixi-S0B50&confirm=t' > h36m_4.tar.gz
+curl -L 'https://drive.google.com/uc?export=download&id=1-C3y2TbFk-EGY3-MJ3T_8OQOlOL7MyKT&confirm=t' > h36m_5.tar.gz
+
+
+curl -L 'https://drive.google.com/uc?export=download&id=1-Ci_ZnRUZTSzk-YlJyYcD_fVAN7jZXCN&confirm=t' > mpi_1.tar.gz
+curl -L 'https://drive.google.com/uc?export=download&id=1-Ci_ZnRUZTSzk-YlJyYcD_fVAN7jZXCN&confirm=t' > mpi_2.tar.gz
+curl -L 'https://drive.google.com/uc?export=download&id=1-Ci_ZnRUZTSzk-YlJyYcD_fVAN7jZXCN&confirm=t' > mpi_3.tar.gz
+curl -L 'https://drive.google.com/uc?export=download&id=1-Ci_ZnRUZTSzk-YlJyYcD_fVAN7jZXCN&confirm=t' > mpi_4.tar.gz
+curl -L 'https://drive.google.com/uc?export=download&id=1-Ci_ZnRUZTSzk-YlJyYcD_fVAN7jZXCN&confirm=t' > mpi_5.tar.gz
+
+
+curl -L 'https://drive.google.com/uc?export=download&id=1YIS6wOsywTPxTx85vDwFP2ymuMOcJQS-&confirm=t' > h36m.tar.gz
+curl -L 'https://drive.google.com/uc?export=download&id=1pCeKHM3Tm6GMYAnMUBM4Z6h0wyRs373_&confirm=t' > mpi.tar.gz
