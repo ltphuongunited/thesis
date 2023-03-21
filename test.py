@@ -9,15 +9,17 @@ from tqdm import tqdm
 # data = json.load(f)
 # print(data['15'].keys())
 
-# a = np.load('h36m_fits.npy')
-# print(a[10000][:10])
+# a = np.load('data/static_fits/h36m_fits_right.npy')
+# # print(a.shape)
+# np.save('h36m_fits.npy',a[:32])
+# print(a[10000][:32])
 # a = np.load('data_pymaf/static_Fits/h36m.npy')
-# print(a[10000][:10])
+# print(a[10000][:32])
 # print(sum(a[0][:72] < 0))
-data1 = np.load('data/dataset_extras/lsp_dataset_test.npz')
+data1 = np.load('data/dataset_extras/3dpw_test.npz')
 # data2 = np.load('/home/tienthinh/phuong/SPIN/data/dataset_extras/h36m_mosh_train.npz')
 # data3 = np.load('data/dataset_extras/h36m_valid_protocol2_newpath.npz')
-print(data1['imgname'][100])
+# print(data1['imgname'][100])
 for key in data1.keys():
     print("variable name:", key          , end="  ")
     print("type: "+ str(data1[key].dtype) , end="  ")
@@ -38,11 +40,13 @@ for key in data1.keys():
 #     print("type: "+ str(data3[key].dtype) , end="  ")
 #     print("shape:"+ str(data3[key].shape))
 
-# np.savez('h36m_valid_protocol2_newpath.npz',
-#                     imgname=np.array(list(map(lambda x: x.split('/')[-1], data1['imgname']))),
-#                     center=data1['center'],
-#                     scale=data1['scale'],
-#                     S=data1['S'])
+np.savez('3dpw_valid.npz',
+                    imgname=data1['imgname'][:32],
+                    center=data1['center'][:32],
+                    scale=data1['scale'][:32],
+                    pose=data1['pose'][:32],
+                    shape=data1['shape'][:32],
+                    gender=data1['gender'][:32])
 
 # e = []
 # for i in tqdm(range(data1['pose'].shape[0])):

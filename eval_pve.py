@@ -27,7 +27,7 @@ import torchgeometry as tgm
 
 import config
 import constants
-from models import hmr, SMPL, hmr_ktd, hmr_tfm
+from models import hmr, SMPL, hmr_ktd, hmr_tfm, ktd
 from datasets import BaseDataset
 from utils.imutils import uncrop
 from utils.pose_utils import reconstruction_error
@@ -348,8 +348,8 @@ if __name__ == '__main__':
 
     # model = hmr(config.SMPL_MEAN_PARAMS)
     # model = hmr_ktd(config.SMPL_MEAN_PARAMS)
-    model = hmr_tfm(config.SMPL_MEAN_PARAMS)
-
+    # model = hmr_tfm(config.SMPL_MEAN_PARAMS)
+    model = ktd(config.SMPL_MEAN_PARAMS)
     checkpoint = torch.load(args.checkpoint)
     model.load_state_dict(checkpoint['model'], strict=False)
     model.eval()

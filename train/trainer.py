@@ -10,30 +10,42 @@ from smplify import SMPLify
 from utils.geometry import batch_rodrigues, perspective_projection, estimate_translation
 from utils.renderer import Renderer
 from utils import BaseTrainer
+from utils.pose_utils import reconstruction_error
 
 import config
 import constants
 from .fits_dict import FitsDict
+import time
+from tqdm import tqdm
+from torch.utils.data import DataLoader
+import torchgeometry as tgm
+from torch.optim.lr_scheduler import StepLR
 
 
 class Trainer(BaseTrainer):
     
     def init_fn(self):
         self.train_ds = MixedDataset(self.options, ignore_3d=self.options.ignore_3d, is_train=True)
-        self.valid_ds = BaseDataset(self.options, self.options.eval_dataset, is_train=False)
-
-        # self.model = hmr(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+        self.model = hmr(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         # self.model = hmr_ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         # self.model = hmr_hr(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         # self.model = hmr_tfm(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
-        self.model = ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+        # self.model = ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         
         self.optimizer = torch.optim.Adam(params=self.model.parameters(),
                                           lr=self.options.lr,
                                           weight_decay=0)
+        self.scheduler = StepLR(self.optimizer, step_size=5, gamma=1)
+        
         self.smpl = SMPL(config.SMPL_MODEL_DIR,
                          batch_size=self.options.batch_size,
                          create_transl=False).to(self.device)
+        self.smpl_male = SMPL(model_path=config.SMPL_MODEL_DIR,
+                                gender='male',
+                                create_transl=False).to(self.device)
+        self.smpl_female = SMPL(model_path=config.SMPL_MODEL_DIR,
+                                gender='female',
+                                create_transl=False).to(self.device)
         # Per-vertex loss on the shape
         self.criterion_shape = nn.L1Loss().to(self.device)
         # Keypoint (2D and 3D) loss
@@ -305,3 +317,140 @@ class Trainer(BaseTrainer):
         self.summary_writer.add_image('opt_shape', images_opt, self.step_count)
         for loss_name, val in losses.items():
             self.summary_writer.add_scalar(loss_name, val, self.step_count)
+    
+
+    def evaluate(self):
+        self.model.eval()
+        # Regressor for H36m joints
+        J_regressor = torch.from_numpy(np.load(config.JOINT_REGRESSOR_H36M)).float()
+        
+        shuffle = False
+        batch_size = self.options.batch_size
+        batch_size = 32
+        dataset_name = self.options.eval_dataset
+        result_file = None
+        num_workers = self.options.num_workers
+        device = self.device
+        
+        # Regressor for H36m joints
+        J_regressor = torch.from_numpy(np.load(config.JOINT_REGRESSOR_H36M)).float()
+
+        save_results = result_file is not None
+        # Disable shuffling if you want to save the results
+        if save_results:
+            shuffle=False
+        # Create dataloader for the dataset
+        dataset = BaseDataset(self.options, dataset_name, is_train=False)
+        data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+        
+        # Pose metrics
+        # MPJPE and Reconstruction error for the non-parametric and parametric shapes
+        mpjpe = np.zeros(len(dataset))
+        recon_err = np.zeros(len(dataset))
+        pve = np.zeros(len(dataset))
+
+
+        # Store SMPL parameters
+        smpl_pose = np.zeros((len(dataset), 72))
+        smpl_betas = np.zeros((len(dataset), 10))
+        smpl_camera = np.zeros((len(dataset), 3))
+        pred_joints = np.zeros((len(dataset), 17, 3))
+        action_idxes = {}
+        idx_counter = 0
+
+
+        eval_pose = False
+
+        # Choose appropriate evaluation for each dataset
+        if dataset_name == 'h36m-p1' or dataset_name == 'h36m-p2' or dataset_name == 'h36m-p2-mosh' \
+        or dataset_name == '3dpw' or dataset_name == 'mpi-inf-3dhp' or dataset_name == '3doh50k':
+            eval_pose = True
+
+        joint_mapper_h36m = constants.H36M_TO_J17 if dataset_name == 'mpi-inf-3dhp' else constants.H36M_TO_J14
+        joint_mapper_gt = constants.J24_TO_J17 if dataset_name == 'mpi-inf-3dhp' else constants.J24_TO_J14
+        # Iterate over the entire dataset
+        cnt = 0
+        results_dict = {'id': [], 'pred': [], 'pred_pa': [], 'gt': []}
+        for step, batch in enumerate(tqdm(data_loader, desc='Eval', total=len(data_loader))):
+            # Get ground truth annotations from the batch
+            gt_pose = batch['pose'].to(device)
+            gt_betas = batch['betas'].to(device)
+            gt_smpl_out = self.smpl(betas=gt_betas, body_pose=gt_pose[:, 3:], global_orient=gt_pose[:, :3])
+            gt_vertices_nt = gt_smpl_out.vertices
+            images = batch['img'].to(device)
+            gender = batch['gender'].to(device)
+            curr_batch_size = images.shape[0]
+
+            if save_results:
+                s_id = np.array([int(item.split('/')[-3][-1]) for item in batch['imgname']]) * 10000
+                s_id += np.array([int(item.split('/')[-1][4:-4]) for item in batch['imgname']])
+                results_dict['id'].append(s_id)
+
+            if dataset_name == 'h36m-p2':
+                action = [im_path.split('/')[-1].split('.')[0].split('_')[1] for im_path in batch['imgname']]
+                for act_i in range(len(action)):
+
+                    if action[act_i] in action_idxes:
+                        action_idxes[action[act_i]].append(idx_counter + act_i)
+                    else:
+                        action_idxes[action[act_i]] = [idx_counter + act_i]
+                idx_counter += len(action)
+
+            with torch.no_grad():
+                pred_rotmat, pred_betas, pred_camera = self.model(images)
+
+                pred_output = self.smpl(betas=pred_betas, body_pose=pred_rotmat[:,1:], global_orient=pred_rotmat[:,0].unsqueeze(1), pose2rot=False)
+                pred_vertices = pred_output.vertices
+
+            if save_results:
+                rot_pad = torch.tensor([0,0,1], dtype=torch.float32, device=device).view(1,3,1)
+                rotmat = torch.cat((pred_rotmat.view(-1, 3, 3), rot_pad.expand(curr_batch_size * 24, -1, -1)), dim=-1)
+                pred_pose = tgm.rotation_matrix_to_angle_axis(rotmat).contiguous().view(-1, 72)
+                smpl_pose[step * batch_size:step * batch_size + curr_batch_size, :] = pred_pose.cpu().numpy()
+                smpl_betas[step * batch_size:step * batch_size + curr_batch_size, :]  = pred_betas.cpu().numpy()
+                smpl_camera[step * batch_size:step * batch_size + curr_batch_size, :]  = pred_camera.cpu().numpy()
+
+            # 3D pose evaluation
+            if eval_pose:
+                # Regressor broadcasting
+                J_regressor_batch = J_regressor[None, :].expand(pred_vertices.shape[0], -1, -1).to(device)
+                # Get 14 ground truth joints
+                if 'h36m' in dataset_name or 'mpi-inf' in dataset_name or '3doh50k' in dataset_name:
+                    gt_keypoints_3d = batch['pose_3d'].cuda()
+                    gt_keypoints_3d = gt_keypoints_3d[:, joint_mapper_gt, :-1]
+                # For 3DPW get the 14 common joints from the rendered shape
+                else:
+                    gt_vertices = self.smpl_male(global_orient=gt_pose[:,:3], body_pose=gt_pose[:,3:], betas=gt_betas).vertices 
+                    gt_vertices_female = self.smpl_female(global_orient=gt_pose[:,:3], body_pose=gt_pose[:,3:], betas=gt_betas).vertices 
+                    gt_vertices[gender==1, :, :] = gt_vertices_female[gender==1, :, :]
+                    gt_keypoints_3d = torch.matmul(J_regressor_batch, gt_vertices)
+                    gt_pelvis = gt_keypoints_3d[:, [0],:].clone()
+                    gt_keypoints_3d = gt_keypoints_3d[:, joint_mapper_h36m, :]
+                    gt_keypoints_3d = gt_keypoints_3d - gt_pelvis
+
+                if '3dpw' in dataset_name:
+                    per_vertex_error = torch.sqrt(((pred_vertices - gt_vertices) ** 2).sum(dim=-1)).mean(dim=-1).cpu().numpy()
+                else:
+                    per_vertex_error = torch.sqrt(((pred_vertices - gt_vertices_nt) ** 2).sum(dim=-1)).mean(dim=-1).cpu().numpy()
+                pve[step * batch_size:step * batch_size + curr_batch_size] = per_vertex_error
+
+                # Get 14 predicted joints from the mesh
+                pred_keypoints_3d = torch.matmul(J_regressor_batch, pred_vertices)
+                if save_results:
+                    pred_joints[step * batch_size:step * batch_size + curr_batch_size, :, :]  = pred_keypoints_3d.cpu().numpy()
+                pred_pelvis = pred_keypoints_3d[:, [0],:].clone()
+                pred_keypoints_3d = pred_keypoints_3d[:, joint_mapper_h36m, :]
+                pred_keypoints_3d = pred_keypoints_3d - pred_pelvis
+
+                # Absolute error (MPJPE)
+                error = torch.sqrt(((pred_keypoints_3d - gt_keypoints_3d) ** 2).sum(dim=-1)).mean(dim=-1).cpu().numpy()
+                mpjpe[step * batch_size:step * batch_size + curr_batch_size] = error
+
+                # Reconstuction_error
+                r_error, pred_keypoints_3d_pa = reconstruction_error(pred_keypoints_3d.cpu().numpy(), gt_keypoints_3d.cpu().numpy(), reduction=None)
+                recon_err[step * batch_size:step * batch_size + curr_batch_size] = r_error
+
+
+        pa_mpjpe = 1000 * recon_err.mean()
+        tqdm.write('PA-MPJPE on 3DPW: ' + str(pa_mpjpe))
+        return pa_mpjpe
