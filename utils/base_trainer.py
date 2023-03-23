@@ -74,7 +74,8 @@ class BaseTrainer(object):
                     if self.step_count % self.options.summary_steps == 0:
                         self.train_summaries(batch, *out)
                     # Run validation every test_steps steps & Save checkpoint
-                    if self.step_count % (len(train_data_loader) // 2) == 0:
+                    # if self.step_count % (len(train_data_loader) // 2) == 0:
+                    if self.step_count % self.options.checkpoint_steps == 0:
                         # self.validate()
                         performance = self.evaluate()
                         is_best = performance < self.best_performance

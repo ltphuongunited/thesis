@@ -58,7 +58,7 @@ class Trainer(BaseTrainer):
         self.focal_length = constants.FOCAL_LENGTH
 
         # Initialize SMPLify fitting module
-        self.smplify = SMPLify(step_size=1e-2, batch_size=self.options.batch_size, num_iters=self.options.num_smplify_iters, focal_length=self.focal_length)
+        self.smplify = SMPLify(step_size=1e-2, batch_size=self.options.batch_size, num_iters=self.options.num_smplify_iters, focal_length=self.focal_length,device=self.device)
         if self.options.pretrained_checkpoint is not None:
             self.load_pretrained(checkpoint_file=self.options.pretrained_checkpoint)
 

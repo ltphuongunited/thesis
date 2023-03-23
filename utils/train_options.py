@@ -40,7 +40,7 @@ class TrainOptions():
         train.add_argument('--noise_factor', type=float, default=0.4, help='Randomly multiply pixel values with factor in the range [1-noise_factor, 1+noise_factor]') 
         train.add_argument('--scale_factor', type=float, default=0.25, help='Rescale bounding boxes by a factor of [1-scale_factor,1+scale_factor]') 
         train.add_argument('--ignore_3d', default=False, action='store_true', help='Ignore GT 3D data (for unpaired experiments') 
-        train.add_argument('--shape_loss_weight', default=1, type=float, help='Weight of per-vertex loss') 
+        train.add_argument('--shape_loss_weight', default=0, type=float, help='Weight of per-vertex loss') 
         train.add_argument('--keypoint_loss_weight', default=5., type=float, help='Weight of 2D and 3D keypoint loss') 
         train.add_argument('--pose_loss_weight', default=1., type=float, help='Weight of SMPL pose loss') 
         train.add_argument('--beta_loss_weight', default=0.001, type=float, help='Weight of SMPL betas loss') 
@@ -48,7 +48,7 @@ class TrainOptions():
         train.add_argument('--gt_train_weight', default=1., help='Weight for GT keypoints during training') 
         train.add_argument('--run_smplify', default=False, action='store_true', help='Run SMPLify during training') 
         train.add_argument('--smplify_threshold', type=float, default=100., help='Threshold for ignoring SMPLify fits during training') 
-        train.add_argument('--num_smplify_iters', default=100, type=int, help='Number of SMPLify iterations') 
+        train.add_argument('--num_smplify_iters', default=50, type=int, help='Number of SMPLify iterations') 
 
         shuffle_train = train.add_mutually_exclusive_group()
         shuffle_train.add_argument('--shuffle_train', dest='shuffle_train', action='store_true', help='Shuffle training data')

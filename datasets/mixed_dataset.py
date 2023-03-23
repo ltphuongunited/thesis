@@ -10,8 +10,8 @@ class MixedDataset(torch.utils.data.Dataset):
     def __init__(self, options, **kwargs):
         self.dataset_list = ['h36m', 'lsp-orig', 'mpii', 'lspet', 'coco', 'mpi-inf-3dhp']
         self.dataset_dict = {'h36m': 0, 'lsp-orig': 1, 'mpii': 2, 'lspet': 3, 'coco': 4, 'mpi-inf-3dhp': 5}
-        # self.dataset_list = ['h36m']
-        # self.dataset_dict = {'h36m': 0}
+        # self.dataset_list = ['3dpw']
+        # self.dataset_dict = {'3dpw': 0}
         
         self.datasets = [BaseDataset(options, ds, **kwargs) for ds in self.dataset_list]
         total_length = sum([len(ds) for ds in self.datasets])
