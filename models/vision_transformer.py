@@ -21,7 +21,7 @@ from .ops import DropPath
 from .resnetv2 import ResNetV2
 from torchvision.models.utils import load_state_dict_from_url
 
-from lib.utils.utils import determine_output_feature_dim
+from utils.utils import determine_output_feature_dim
 
 model_urls = {
     'vit_tiny_patch16_224': 'https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-vitjx/jx_vit_base_p16_224-80ecf9dd.pth',
