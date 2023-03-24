@@ -6,6 +6,7 @@ import cv2
 
 from datasets import MixedDataset, BaseDataset
 from models import hmr, SMPL, hmr_ktd, hmr_hr, hmr_tfm, ktd
+from models import Token3d
 from smplify import SMPLify
 from utils.geometry import batch_rodrigues, perspective_projection, estimate_translation
 from utils.renderer import Renderer
@@ -26,12 +27,12 @@ class Trainer(BaseTrainer):
     
     def init_fn(self):
         self.train_ds = MixedDataset(self.options, ignore_3d=self.options.ignore_3d, is_train=True)
-        self.model = hmr(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+        # self.model = hmr(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         # self.model = hmr_ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         # self.model = hmr_hr(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         # self.model = hmr_tfm(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         # self.model = ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
-        
+        self.model = Token3d(smpl_mean_params=config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         self.optimizer = torch.optim.Adam(params=self.model.parameters(),
                                           lr=self.options.lr,
                                           weight_decay=0)

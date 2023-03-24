@@ -2,10 +2,15 @@ import torch
 import torch.nn as nn
 import numpy as np
 # , HybridEmbed, PatchEmbed, Block
-from lib.models.vision_transformer import VisionTransformer, trunc_normal_, Block
-from lib.utils.geometry import rot6d_to_rotmat, rotation_matrix_to_angle_axis
-from lib.models.smpl import SMPL, SMPL_MODEL_DIR, SMPL_MEAN_PARAMS
-from lib.models.spin import projection
+from .vision_transformer import VisionTransformer, trunc_normal_, Block
+from utils.geometry import rot6d_to_rotmat
+from .smpl import SMPL
+from config import SMPL_MEAN_PARAMS, SMPL_MODEL_DIR
+
+from models.resnetv2 import ResNetV2
+import torch.utils.model_zoo as model_zoo
+from .vision_transformer import _conv_filter, model_urls
+from functools import partial
 
 
 class TokenPoseRot6d(VisionTransformer):
@@ -177,6 +182,7 @@ class TokenPoseRot6d(VisionTransformer):
         return pred_joint3d_tokens_temporal
 
     def forward(self, x, J_regressor=None, **kwargs):
+        x = x.permute(0,3,1,2)
 
         batch_size, seqlen = x.shape[:2]
         x = x.reshape(-1, x.shape[-3], x.shape[-2], x.shape[-1])  # (NT, 3, H, W)
@@ -193,24 +199,24 @@ class TokenPoseRot6d(VisionTransformer):
         pred_shape = self.shape_head(shape_token)
         pred_cam = self.cam_head(cam_token)
 
+        output = {}
+
+        # mse loss
+        if self.reconstruct and self.training:
+            reconstruct_loss = (joint3d_tokens - joint3d_tokens_before)**2
+            reconstruct_loss = reconstruct_loss.mean()
+            output['reconstruct_loss'] = reconstruct_loss
+
         nt = pred_joints_rot6d.shape[0]
         pred_rotmat = rot6d_to_rotmat(pred_joints_rot6d).reshape(nt, -1, 3, 3)
 
         return pred_rotmat, pred_shape, pred_cam
 
-
-
-from lib.models.resnetv2 import ResNetV2
-import torch.utils.model_zoo as model_zoo
-from lib.models.vision_transformer import _conv_filter, model_urls
-from functools import partial
-
-
-def Token3d(num_blocks, num_heads, st_mode, pretrained=True, proj_rot_mode='linear',
+def Token3d(smpl_mean_params,num_blocks=12, num_heads=12, st_mode='vanilla', pretrained=True, proj_rot_mode='linear',
             use_joint2d_head=False, contraint_token_delta=False,
             use_rot6d_to_token_head=False, mask_ratio=0.,
             temporal_layers=3, temporal_num_heads=1,
-            enable_temp_modeling=True, enable_temp_embedding=False,
+            enable_temp_modeling=False, enable_temp_embedding=False,
             **kwargs):
     """ Hybrid model with a R50 and a Vit of custom layers .
     """

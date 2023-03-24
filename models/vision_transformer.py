@@ -15,11 +15,10 @@ import joblib
 from collections import OrderedDict
 from functools import partial
 from itertools import repeat
-from torch._six import container_abcs
 
 from .ops import DropPath
 from .resnetv2 import ResNetV2
-from torchvision.models.utils import load_state_dict_from_url
+# from torchvision.models.utils import load_state_dict_from_url
 
 from utils.utils import determine_output_feature_dim
 
