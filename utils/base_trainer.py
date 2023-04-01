@@ -34,8 +34,8 @@ class BaseTrainer(object):
             self.step_count = self.checkpoint['total_step_count']
             self.best_performance = self.checkpoint['best_performance']
 
-            for param_group in self.optimizer.param_groups:
-                param_group['lr'] = self.checkpoint['lr']
+            # for param_group in self.optimizer.param_groups:
+            #     param_group['lr'] = self.checkpoint['lr']
         
         
     def load_pretrained(self, checkpoint_file=None):

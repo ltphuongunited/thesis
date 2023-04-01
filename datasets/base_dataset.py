@@ -52,7 +52,8 @@ class BaseDataset(Dataset):
             if 'has_smpl' in self.data:
                 self.has_smpl = self.data['has_smpl']
             else:
-                self.has_smpl = np.ones(len(self.imgname))
+                # self.has_smpl = np.ones(len(self.imgname))
+                self.has_smpl = np.zeros(len(self.imgname))
         except KeyError:
             self.has_smpl = np.zeros(len(self.imgname))
         if ignore_3d:

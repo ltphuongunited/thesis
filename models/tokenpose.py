@@ -182,7 +182,6 @@ class TokenPoseRot6d(VisionTransformer):
         return pred_joint3d_tokens_temporal
 
     def forward(self, x, J_regressor=None, **kwargs):
-        x = x.permute(0,3,1,2)
 
         batch_size, seqlen = x.shape[:2]
         x = x.reshape(-1, x.shape[-3], x.shape[-2], x.shape[-1])  # (NT, 3, H, W)
@@ -196,7 +195,7 @@ class TokenPoseRot6d(VisionTransformer):
 
         # # [bs*seq_length, N, embed_dim]
         pred_joints_rot6d = self.joint3d_head(joint3d_tokens)  # [b, 24, 6]
-        pred_shape = self.shape_head(shape_token)
+        pred_shape = self.shape_head(shape_token) # [b, 10]
         pred_cam = self.cam_head(cam_token)
 
         output = {}

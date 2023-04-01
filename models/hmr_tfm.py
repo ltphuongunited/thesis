@@ -26,7 +26,7 @@ class PositionalEncoding(nn.Module):
         return self.dropout(x)
     
 class TFM(nn.Module):
-    def __init__(self, input_size=2054,output_size=6,num_layers=4,num_heads=2,hidden_size=512,dropout=0.2):
+    def __init__(self, input_size=2054,output_size=6,num_layers=6,num_heads=13,hidden_size=512,dropout=0.2):
         super(TFM, self).__init__()
         self.pos_encoder = PositionalEncoding(input_size, dropout)
         self.encoder = nn.TransformerEncoder(

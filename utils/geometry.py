@@ -71,6 +71,11 @@ def perspective_projection(points, rotation, translation,
         focal_length (bs,) or scalar: Focal length
         camera_center (bs, 2): Camera center
     """
+    '''
+    K = | f  0  cx |
+        | 0  f  cy |
+        | 0  0   1 |
+    '''
     batch_size = points.shape[0]
     K = torch.zeros([batch_size, 3, 3], device=points.device)
     K[:,0,0] = focal_length
@@ -107,24 +112,24 @@ def estimate_translation_np(S, joints_2d, joints_conf, focal_length=5000, img_si
     center = np.array([img_size/2., img_size/2.])
 
     # transformations
-    Z = np.reshape(np.tile(S[:,2],(2,1)).T,-1)
-    XY = np.reshape(S[:,0:2],-1)
-    O = np.tile(center,num_joints)
-    F = np.tile(f,num_joints)
-    weight2 = np.reshape(np.tile(np.sqrt(joints_conf),(2,1)).T,-1)
+    Z = np.reshape(np.tile(S[:,2],(2,1)).T,-1) #(50,) lap lai chieu z 2 lan
+    XY = np.reshape(S[:,0:2],-1) #(50,)
+    O = np.tile(center,num_joints) #(50,)
+    F = np.tile(f,num_joints) #(50,)
+    weight2 = np.reshape(np.tile(np.sqrt(joints_conf),(2,1)).T,-1) #(50,)
 
     # least squares
-    Q = np.array([F*np.tile(np.array([1,0]),num_joints), F*np.tile(np.array([0,1]),num_joints), O-np.reshape(joints_2d,-1)]).T
-    c = (np.reshape(joints_2d,-1)-O)*Z - F*XY
+    Q = np.array([F*np.tile(np.array([1,0]),num_joints), F*np.tile(np.array([0,1]),num_joints), O-np.reshape(joints_2d,-1)]).T #(50,3)
+    c = (np.reshape(joints_2d,-1)-O)*Z - F*XY #(50,)
 
     # weighted least squares
-    W = np.diagflat(weight2)
-    Q = np.dot(W,Q)
-    c = np.dot(W,c)
+    W = np.diagflat(weight2) #(50,50)
+    Q = np.dot(W,Q) #(50,3)
+    c = np.dot(W,c) #(50,)
 
     # square matrix
-    A = np.dot(Q.T,Q)
-    b = np.dot(Q.T,c)
+    A = np.dot(Q.T,Q) #(3,3)
+    b = np.dot(Q.T,c) #(3,)
 
     # solution
     trans = np.linalg.solve(A, b)

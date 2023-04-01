@@ -15,7 +15,7 @@ class TrainOptions():
         gen = self.parser.add_argument_group('General')
         gen.add_argument('--time_to_run', type=int, default=np.inf, help='Total time to run in seconds. Used for training in environments with timing constraints')
         gen.add_argument('--resume', dest='resume', default=False, action='store_true', help='Resume from checkpoint (Use latest checkpoint by default')
-        gen.add_argument('--num_workers', type=int, default=8, help='Number of processes used for data loading')
+        gen.add_argument('--num_workers', type=int, default=16, help='Number of processes used for data loading')
         pin = gen.add_mutually_exclusive_group()
         pin.add_argument('--pin_memory', dest='pin_memory', action='store_true')
         pin.add_argument('--no_pin_memory', dest='pin_memory', action='store_false')
@@ -48,7 +48,7 @@ class TrainOptions():
         train.add_argument('--gt_train_weight', default=1., help='Weight for GT keypoints during training') 
         train.add_argument('--run_smplify', default=False, action='store_true', help='Run SMPLify during training') 
         train.add_argument('--smplify_threshold', type=float, default=100., help='Threshold for ignoring SMPLify fits during training') 
-        train.add_argument('--num_smplify_iters', default=50, type=int, help='Number of SMPLify iterations') 
+        train.add_argument('--num_smplify_iters', default=25, type=int, help='Number of SMPLify iterations') 
 
         shuffle_train = train.add_mutually_exclusive_group()
         shuffle_train.add_argument('--shuffle_train', dest='shuffle_train', action='store_true', help='Shuffle training data')

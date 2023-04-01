@@ -28,11 +28,11 @@ class Trainer(BaseTrainer):
     def init_fn(self):
         self.train_ds = MixedDataset(self.options, ignore_3d=self.options.ignore_3d, is_train=True)
         # self.model = hmr(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
-        # self.model = hmr_ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+        self.model = hmr_ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         # self.model = hmr_hr(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         # self.model = hmr_tfm(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         # self.model = ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
-        self.model = Token3d(smpl_mean_params=config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+        # self.model = Token3d(smpl_mean_params=config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         self.optimizer = torch.optim.Adam(params=self.model.parameters(),
                                           lr=self.options.lr,
                                           weight_decay=0)
@@ -64,7 +64,7 @@ class Trainer(BaseTrainer):
             self.load_pretrained(checkpoint_file=self.options.pretrained_checkpoint)
 
         # Load dictionary of fits
-        self.fits_dict = FitsDict(self.options, self.train_ds)
+        # self.fits_dict = FitsDict(self.options, self.train_ds)
 
         # Create renderer
         self.renderer = Renderer(focal_length=self.focal_length, img_res=self.options.img_res, faces=self.smpl.faces)
@@ -148,13 +148,16 @@ class Trainer(BaseTrainer):
         gt_vertices = gt_out.vertices
 
         # Get current best fits from the dictionary
-        opt_pose, opt_betas = self.fits_dict[(dataset_name, indices.cpu(), rot_angle.cpu(), is_flipped.cpu())]
-        opt_pose = opt_pose.to(self.device)
-        opt_betas = opt_betas.to(self.device)
-        opt_output = self.smpl(betas=opt_betas, body_pose=opt_pose[:,3:], global_orient=opt_pose[:,:3])
-        opt_vertices = opt_output.vertices
-        opt_joints = opt_output.joints
-
+        # opt_pose, opt_betas = self.fits_dict[(dataset_name, indices.cpu(), rot_angle.cpu(), is_flipped.cpu())]
+        # opt_pose = opt_pose.to(self.device)
+        # opt_betas = opt_betas.to(self.device)
+        # opt_output = self.smpl(betas=opt_betas, body_pose=opt_pose[:,3:], global_orient=opt_pose[:,:3])
+        # opt_vertices = opt_output.vertices
+        # opt_joints = opt_output.joints
+        opt_pose = gt_pose.to(self.device)
+        opt_betas = gt_betas.to(self.device)
+        opt_vertices = gt_vertices
+        opt_joints = gt_model_joints
 
         # De-normalize 2D keypoints from [-1,1] to pixel space
         gt_keypoints_2d_orig = gt_keypoints_2d.clone()
@@ -164,8 +167,8 @@ class Trainer(BaseTrainer):
         # by minimizing a weighted least squares loss
         gt_cam_t = estimate_translation(gt_model_joints, gt_keypoints_2d_orig, focal_length=self.focal_length, img_size=self.options.img_res)
 
-        opt_cam_t = estimate_translation(opt_joints, gt_keypoints_2d_orig, focal_length=self.focal_length, img_size=self.options.img_res)
-
+        # opt_cam_t = estimate_translation(opt_joints, gt_keypoints_2d_orig, focal_length=self.focal_length, img_size=self.options.img_res)
+        opt_cam_t = gt_cam_t
 
         opt_joint_loss = self.smplify.get_fitting_loss(opt_pose, opt_betas, opt_cam_t,
                                                        0.5 * self.options.img_res * torch.ones(batch_size, 2, device=self.device),
@@ -225,7 +228,7 @@ class Trainer(BaseTrainer):
             opt_cam_t[update, :] = new_opt_cam_t[update, :]
 
 
-            self.fits_dict[(dataset_name, indices.cpu(), rot_angle.cpu(), is_flipped.cpu(), update.cpu())] = (opt_pose.cpu(), opt_betas.cpu())
+            # self.fits_dict[(dataset_name, indices.cpu(), rot_angle.cpu(), is_flipped.cpu(), update.cpu())] = (opt_pose.cpu(), opt_betas.cpu())
 
         else:
             update = torch.zeros(batch_size, device=self.device).byte()
@@ -327,7 +330,6 @@ class Trainer(BaseTrainer):
         
         shuffle = False
         batch_size = self.options.batch_size
-        batch_size = 32
         dataset_name = self.options.eval_dataset
         result_file = None
         num_workers = self.options.num_workers

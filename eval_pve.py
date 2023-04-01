@@ -27,7 +27,7 @@ import torchgeometry as tgm
 
 import config
 import constants
-from models import hmr, SMPL, hmr_ktd, hmr_tfm, ktd
+from models import hmr, SMPL, hmr_ktd, hmr_tfm, ktd, Token3d
 from datasets import BaseDataset
 from utils.imutils import uncrop
 from utils.pose_utils import reconstruction_error
@@ -346,11 +346,14 @@ def run_evaluation(model, dataset):
 if __name__ == '__main__':
     args = parser.parse_args()
 
-    # model = hmr(config.SMPL_MEAN_PARAMS)
+    model = hmr(config.SMPL_MEAN_PARAMS)
     # model = hmr_ktd(config.SMPL_MEAN_PARAMS)
     # model = hmr_tfm(config.SMPL_MEAN_PARAMS)
-    model = ktd(config.SMPL_MEAN_PARAMS)
+    # model = ktd(config.SMPL_MEAN_PARAMS)
+    # model=Token3d(config.SMPL_MEAN_PARAMS)
+    # print(model)
     checkpoint = torch.load(args.checkpoint)
+
     model.load_state_dict(checkpoint['model'], strict=False)
     model.eval()
 
