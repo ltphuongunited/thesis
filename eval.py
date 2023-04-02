@@ -12,11 +12,9 @@ Running the above command will compute the MPJPE and Reconstruction Error on the
 5. MPI-INF-3DHP ```--dataset=mpi-inf-3dhp```
 """
 
-import numpy as np
 import torch
-torch.manual_seed(10)
-np.random.seed(10)
 from torch.utils.data import DataLoader
+import numpy as np
 import cv2
 import os
 import argparse
@@ -27,7 +25,7 @@ import torchgeometry as tgm
 
 import config
 import constants
-from models import hmr, SMPL, hmr_ktd, hmr_tfm
+from models import hmr, SMPL
 from datasets import BaseDataset
 from utils.imutils import uncrop
 from utils.pose_utils import reconstruction_error
@@ -74,7 +72,7 @@ def run_evaluation(model, dataset_name, dataset, result_file,
         shuffle=False
     # Create dataloader for the dataset
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
-
+    
     # Pose metrics
     # MPJPE and Reconstruction error for the non-parametric and parametric shapes
     mpjpe = np.zeros(len(dataset))
@@ -176,7 +174,7 @@ def run_evaluation(model, dataset_name, dataset, result_file,
             mpjpe[step * batch_size:step * batch_size + curr_batch_size] = error
 
             # Reconstuction_error
-            r_error = reconstruction_error(pred_keypoints_3d.cpu().numpy(), gt_keypoints_3d.cpu().numpy(), reduction=None)
+            r_error,_ = reconstruction_error(pred_keypoints_3d.cpu().numpy(), gt_keypoints_3d.cpu().numpy(), reduction=None)
             recon_err[step * batch_size:step * batch_size + curr_batch_size] = r_error
 
 
@@ -266,10 +264,9 @@ def run_evaluation(model, dataset_name, dataset, result_file,
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    # model = hmr(config.SMPL_MEAN_PARAMS)
-    # model = hmr_ktd(config.SMPL_MEAN_PARAMS)
-    model = hmr_tfm(config.SMPL_MEAN_PARAMS)
+    model = hmr(config.SMPL_MEAN_PARAMS)
     checkpoint = torch.load(args.checkpoint)
+    # print(checkpoint['best_performance'])
     model.load_state_dict(checkpoint['model'], strict=False)
     model.eval()
 

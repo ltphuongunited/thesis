@@ -31,7 +31,7 @@ from models import hmr, SMPL, hmr_ktd, hmr_tfm, ktd, Token3d
 from datasets import BaseDataset
 from utils.imutils import uncrop
 from utils.pose_utils import reconstruction_error
-from utils.part_utils import PartRenderer
+# from utils.part_utils import PartRenderer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ def run_evaluation(model, dataset):
                        gender='female',
                        create_transl=False).to(device)
     
-    renderer = PartRenderer()
+    # renderer = PartRenderer()
     
     # Regressor for H36m joints
     J_regressor = torch.from_numpy(np.load(config.JOINT_REGRESSOR_H36M)).float()
@@ -231,8 +231,8 @@ def run_evaluation(model, dataset):
         #                 os.path.join('./notebooks/output/demo_results', dataset_name, args.checkpoint.split('/')[-3]), args)
 
         # If mask or part evaluation, render the mask and part images
-        if eval_masks or eval_parts:
-            mask, parts = renderer(pred_vertices, pred_camera)
+        # if eval_masks or eval_parts:
+        #     mask, parts = renderer(pred_vertices, pred_camera)
         # Mask evaluation (for LSP)
         if eval_masks:
             center = batch['center'].cpu().numpy()
@@ -351,9 +351,7 @@ if __name__ == '__main__':
     # model = hmr_tfm(config.SMPL_MEAN_PARAMS)
     # model = ktd(config.SMPL_MEAN_PARAMS)
     # model=Token3d(config.SMPL_MEAN_PARAMS)
-    # print(model)
     checkpoint = torch.load(args.checkpoint)
-
     model.load_state_dict(checkpoint['model'], strict=False)
     model.eval()
 

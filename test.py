@@ -24,10 +24,10 @@ import pickle
 # a = np.load('data_pymaf/static_Fits/h36m.npy')
 # print(a[10000][:32])
 # print(sum(a[0][:72] < 0))
-data1 = np.load('data/dataset_extras/coco_2014_train_cliff_no.npz')
+data1 = np.load('3dpw_test.npz')
 # data2 = np.load('data/dataset_extras/mpi_inf_3dhp_train.npz')
 # data3 = np.load('data/dataset_extras/h36m_valid_protocol2_newpath.npz')
-# print(sum(data1['has_smpl']))
+print(sum(data1['has_smpl']))
 for key in data1.keys():
     print("variable name:", key, end="  ")
     print("type: "+ str(data1[key].dtype) , end="  ")
@@ -48,15 +48,12 @@ for key in data1.keys():
 #     print("type: "+ str(data3[key].dtype) , end="  ")
 #     print("shape:"+ str(data3[key].shape))
 
-# np.savez('3dpw_train.npz',
+# np.savez('3dpw_test.npz',
 #                     imgname=data1['imgname'],
 #                     center=data1['center'],
 #                     scale=data1['scale'],
 #                     pose=data1['pose'],
 #                     shape=data1['shape'],
-#                     part=data1['part'],
-#                     S=data1['S'],
-#                     gshape=data1['gshape'],
 #                     gender=data1['gender'],
 #                     has_smpl=np.ones(len(data1['gender'])))
 
