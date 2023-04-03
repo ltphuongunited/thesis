@@ -28,9 +28,9 @@ class Trainer(BaseTrainer):
     def init_fn(self):
         self.train_ds = MixedDataset(self.options, ignore_3d=self.options.ignore_3d, is_train=True)
         # self.model = hmr(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
-        self.model = hmr_ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+        # self.model = hmr_ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         # self.model = hmr_hr(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
-        # self.model = hmr_tfm(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+        self.model = hmr_tfm(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         # self.model = ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         # self.model = Token3d(smpl_mean_params=config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         self.optimizer = torch.optim.Adam(params=self.model.parameters(),

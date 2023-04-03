@@ -115,14 +115,13 @@ if __name__ == '__main__':
     # Setup renderer for visualization
     renderer = Renderer(focal_length=constants.FOCAL_LENGTH, img_res=constants.IMG_RES, faces=smpl.faces)
 
-
     # Preprocess input image and generate predictions
     img, norm_img = process_image(args.img, args.bbox, args.openpose, input_res=constants.IMG_RES)
     with torch.no_grad():
         pred_rotmat, pred_betas, pred_camera = model(norm_img.to(device))
         pred_output = smpl(betas=pred_betas, body_pose=pred_rotmat[:,1:], global_orient=pred_rotmat[:,0].unsqueeze(1), pose2rot=False)
         pred_vertices = pred_output.vertices
-        
+    print(pred_vertices.shape)    
     # Calculate camera parameters for rendering
     camera_translation = torch.stack([pred_camera[:,1], pred_camera[:,2], 2*constants.FOCAL_LENGTH/(constants.IMG_RES * pred_camera[:,0] +1e-9)],dim=-1)
     camera_translation = camera_translation[0].cpu().numpy()

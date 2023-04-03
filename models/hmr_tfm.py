@@ -26,7 +26,7 @@ class PositionalEncoding(nn.Module):
         return self.dropout(x)
     
 class TFM(nn.Module):
-    def __init__(self, input_size=2054,output_size=6,num_layers=6,num_heads=13,hidden_size=512,dropout=0.2):
+    def __init__(self, input_size=2067,output_size=6,num_layers=6,num_heads=2,hidden_size=256,dropout=0.2):
         super(TFM, self).__init__()
         self.pos_encoder = PositionalEncoding(input_size, dropout)
         self.encoder = nn.TransformerEncoder(
@@ -180,7 +180,7 @@ class HMR_TFM(nn.Module):
             xc = self.drop2(xc)
             pred_shape = self.decshape(xc) + pred_shape
             pred_cam = self.deccam(xc) + pred_cam
-            
+
         #Transformer Encoder
         init_pose_clone = init_pose.clone()
         init_pose_clone = init_pose_clone.view(batch_size, 24, 6)

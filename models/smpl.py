@@ -39,3 +39,9 @@ class SMPL(_SMPL):
         #                      full_pose=smpl_output.full_pose)
         return output
 
+def get_smpl_faces():
+    smpl = SMPL(model_path=config.SMPL_MODEL_DIR, batch_size=1)
+    return smpl.faces
+
+def get_model_faces(type='smpl'):
+    return get_smpl_faces()

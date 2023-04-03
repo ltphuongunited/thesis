@@ -160,3 +160,24 @@ def estimate_translation(S, joints_2d, focal_length=5000., img_size=224.):
         conf_i = joints_conf[i]
         trans[i] = estimate_translation_np(S_i, joints_i, conf_i, focal_length=focal_length, img_size=img_size)
     return torch.from_numpy(trans).to(device)
+
+def convert_to_full_img_cam(
+        pare_cam, bbox_height, bbox_center,
+        img_w, img_h, focal_length):
+    # Converts weak perspective camera estimated by PARE in
+    # bbox coords to perspective camera in full image coordinates
+    # from https://arxiv.org/pdf/2009.06549.pdf
+    s, tx, ty = pare_cam[:, 0], pare_cam[:, 1], pare_cam[:, 2]
+    res = 224
+    r = bbox_height / res
+    tz = 2 * focal_length / (r * res * s)
+
+    cx = 2 * (bbox_center[:, 0] - (img_w / 2.)) / (s * bbox_height)
+    cy = 2 * (bbox_center[:, 1] - (img_h / 2.)) / (s * bbox_height)
+
+    if torch.is_tensor(pare_cam):
+        cam_t = torch.stack([tx + cx, ty + cy, tz], dim=-1)
+    else:
+        cam_t = np.stack([tx + cx, ty + cy, tz], axis=-1)
+
+    return cam_t
