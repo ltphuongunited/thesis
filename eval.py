@@ -25,7 +25,7 @@ import torchgeometry as tgm
 
 import config
 import constants
-from models import hmr, SMPL
+from models import hmr, SMPL, Token3d, hmr_tfm, hmr_ktd, hmr_hr
 from datasets import BaseDataset
 from utils.imutils import uncrop
 from utils.pose_utils import reconstruction_error
@@ -264,16 +264,22 @@ def run_evaluation(model, dataset_name, dataset, result_file,
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    model = hmr(config.SMPL_MEAN_PARAMS)
-    checkpoint = torch.load(args.checkpoint)
-    # print(checkpoint['best_performance'])
-    model.load_state_dict(checkpoint['model'], strict=False)
-    model.eval()
+    # model = hmr(config.SMPL_MEAN_PARAMS)
+    # model = Token3d(config.SMPL_MEAN_PARAMS)
+    # model = hmr_ktd(config.SMPL_MEAN_PARAMS)
+    # model = hmr_tfm(config.SMPL_MEAN_PARAMS)
+    model = hmr_hr(config.SMPL_MEAN_PARAMS)
+    total_params = sum(p.numel() for p in model.parameters())
+    print(total_params)
+    # checkpoint = torch.load(args.checkpoint)
+    # # print(checkpoint['best_performance'])
+    # model.load_state_dict(checkpoint['model'], strict=False)
+    # model.eval()
 
-    # Setup evaluation dataset
-    dataset = BaseDataset(None, args.dataset, is_train=False)
-    # Run evaluation
-    run_evaluation(model, args.dataset, dataset, args.result_file,
-                   batch_size=args.batch_size,
-                   shuffle=args.shuffle,
-                   log_freq=args.log_freq)
+    # # Setup evaluation dataset
+    # dataset = BaseDataset(None, args.dataset, is_train=False)
+    # # Run evaluation
+    # run_evaluation(model, args.dataset, dataset, args.result_file,
+    #                batch_size=args.batch_size,
+    #                shuffle=args.shuffle,
+    #                log_freq=args.log_freq)

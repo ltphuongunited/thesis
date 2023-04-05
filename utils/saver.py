@@ -51,9 +51,10 @@ class CheckpointSaver():
         for model in models:
             if model in checkpoint:
                 models[model].load_state_dict(checkpoint[model])
-        for optimizer in optimizers:
-            if optimizer in checkpoint:
-                optimizers[optimizer].load_state_dict(checkpoint[optimizer])
+        print('Current learning rate in checkpoint:', checkpoint['lr'])
+        # for optimizer in optimizers:
+        #     if optimizer in checkpoint:
+        #         optimizers[optimizer].load_state_dict(checkpoint[optimizer])
         return {'epoch': checkpoint['epoch'],
                 'batch_idx': checkpoint['batch_idx'],
                 'batch_size': checkpoint['batch_size'],

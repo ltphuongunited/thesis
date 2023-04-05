@@ -236,14 +236,23 @@ def run_video_demo(args):
             del tracking_results[person_id]
 
     # ========= Define model ========= #
-    if args.regressor == 'hmr-spin':
-        model = hmr(config.SMPL_MEAN_PARAMS).to(device)
-
-    # ========= Load pretrained weights ========= #
-    if args.checkpoint is not None:
-        checkpoint = torch.load(args.checkpoint)
-        model.load_state_dict(checkpoint['model'], strict=False)
-
+    # if args.regressor == 'hmr-spin':
+    #     model = hmr(config.SMPL_MEAN_PARAMS).to(device)
+    # else:
+    #     pass
+    # # ========= Load pretrained weights ========= #
+    # if args.checkpoint is not None:
+    #     checkpoint = torch.load(args.checkpoint)
+    #     model.load_state_dict(checkpoint['model'], strict=False)
+    # else:
+    #     pass
+    model = hmr(config.SMPL_MEAN_PARAMS).to(device)
+    # model = hmr_ktd(config.SMPL_MEAN_PARAMS)
+    # model = hmr_tfm(config.SMPL_MEAN_PARAMS)
+    # model = ktd(config.SMPL_MEAN_PARAMS)
+    # model=Token3d(config.SMPL_MEAN_PARAMS)
+    checkpoint = torch.load(args.checkpoint)
+    model.load_state_dict(checkpoint['model'], strict=False)
     model.eval()
     print(f'Loaded pretrained weights from \"{args.checkpoint}\"')
 
@@ -308,7 +317,9 @@ def run_video_demo(args):
             has_keypoints = True if joints2d is not None else False
 
             dataloader = DataLoader(dataset, batch_size=args.model_batch_size, num_workers=8)
-
+            smpl = SMPL(config.SMPL_MODEL_DIR,
+                        batch_size=args.model_batch_size,
+                        create_transl=False).to(device)
             with torch.no_grad():
 
                 pred_cam, pred_verts, pred_pose, pred_betas, pred_joints3d, norm_joints2d = [], [], [], [], [], []
@@ -324,19 +335,31 @@ def run_video_demo(args):
                     # batch_size, seqlen = batch.shape[:2]
                     batch_size = batch.shape[0]
                     seqlen = 1
-                    if args.regressor == 'hmr-spin':
-                        # TODO
-                        raise NotImplementedError()
-                    elif args.regressor == 'pymaf_net':
-                        preds_dict, _ = model(batch)
+                    # if args.regressor == 'hmr-spin':
+                    #     output = model(batch)
+                    #     pred_rotmat, pred_betas, pred_camera = model(batch)
+                    #     raise NotImplementedError()
+                    # elif args.regressor == 'pymaf_net':
+                    #     preds_dict, _ = model(batch)
 
-                    output = preds_dict['smpl_out'][-1]
+                    # output = preds_dict['smpl_out'][-1]
 
-                    pred_cam.append(output['theta'][:, :3].reshape(batch_size * seqlen, -1))
-                    pred_verts.append(output['verts'].reshape(batch_size * seqlen, -1, 3))
-                    pred_pose.append(output['theta'][:, 13:85].reshape(batch_size * seqlen, -1))
-                    pred_betas.append(output['theta'][:, 3:13].reshape(batch_size * seqlen, -1))
-                    pred_joints3d.append(output['kp_3d'].reshape(batch_size * seqlen, -1, 3))
+                    # pred_cam.append(output['theta'][:, :3].reshape(batch_size * seqlen, -1))
+                    # pred_verts.append(output['verts'].reshape(batch_size * seqlen, -1, 3))
+                    # pred_pose.append(output['theta'][:, 13:85].reshape(batch_size * seqlen, -1))
+                    # pred_betas.append(output['theta'][:, 3:13].reshape(batch_size * seqlen, -1))
+                    # pred_joints3d.append(output['kp_3d'].reshape(batch_size * seqlen, -1, 3))
+                    rotmat, betas, camera = model(batch)
+                    # print(rotmat.shape, betas.shape, camera.shape)
+                    output = smpl(betas=betas, body_pose=rotmat[:,1:], global_orient=rotmat[:,0].unsqueeze(1), pose2rot=False)
+                    out_vertices = output.vertices
+                    out_joints = output.joints
+                    
+                    pred_cam.append(camera.reshape(batch_size * seqlen, -1))
+                    pred_verts.append(out_vertices.reshape(batch_size * seqlen, -1, 3))
+                    pred_pose.append(rotmat.reshape(batch_size * seqlen, -1))
+                    pred_betas.append(betas.reshape(batch_size * seqlen, -1))
+                    pred_joints3d.append(out_joints.reshape(batch_size * seqlen, -1, 3))
 
                 pred_cam = torch.cat(pred_cam, dim=0)
                 pred_verts = torch.cat(pred_verts, dim=0)

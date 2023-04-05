@@ -129,3 +129,5 @@ hrnetv2_w18_imagenet_pretrained.pth
 cliffGT_v1/
 data_pymaf/
 gdrive/
+output/
+multi/
