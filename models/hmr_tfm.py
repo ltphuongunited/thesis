@@ -25,15 +25,52 @@ class PositionalEncoding(nn.Module):
         x = x + self.pe[:x.size(0)]
         return self.dropout(x)
     
+# class TFM(nn.Module):
+#     def __init__(self, input_size=2067,output_size=6,num_layers=6,num_heads=2,hidden_size=512,dropout=0.2):
+#         super(TFM, self).__init__()
+#         self.pos_encoder = PositionalEncoding(input_size, dropout)
+#         self.encoder = nn.TransformerEncoder(
+#             nn.TransformerEncoderLayer(input_size, num_heads, hidden_size, dropout),
+#             num_layers
+#         )
+#         self.decoder = nn.Linear(input_size, output_size)
+#         self.init_weights()
+
+#     def init_weights(self) -> None:
+#         initrange = 0.1
+#         self.decoder.bias.data.zero_()
+#         self.decoder.weight.data.uniform_(-initrange, initrange)
+        
+#     def forward(self, x):
+#         x = self.pos_encoder(x)
+#         x = self.encoder(x)
+#         x = self.decoder(x)
+#         return x
+
 class TFM(nn.Module):
-    def __init__(self, input_size=2067,output_size=6,num_layers=6,num_heads=2,hidden_size=512,dropout=0.2):
+    def __init__(self, input_size=2054,output_size=6,num_layers=4,num_heads=4,dropout=0.2):
         super(TFM, self).__init__()
         self.pos_encoder = PositionalEncoding(input_size, dropout)
-        self.encoder = nn.TransformerEncoder(
-            nn.TransformerEncoderLayer(input_size, num_heads, hidden_size, dropout),
+
+        self.encoder1 = nn.TransformerEncoder(
+            nn.TransformerEncoderLayer(input_size, 2, 1024, dropout),
             num_layers
         )
-        self.decoder = nn.Linear(input_size, output_size)
+        self.projection1 = nn.Linear(input_size, 1024)
+        
+        self.encoder2 = nn.TransformerEncoder(
+            nn.TransformerEncoderLayer(1024, num_heads, 512, dropout),
+            num_layers
+        )
+        self.projection2 = nn.Linear(1024, 512)
+        
+        self.encoder3 = nn.TransformerEncoder(
+            nn.TransformerEncoderLayer(512, num_heads, 256, dropout),
+            num_layers
+        )
+        self.projection3 = nn.Linear(512, 256)
+
+        self.decoder = nn.Linear(256, output_size)
         self.init_weights()
 
     def init_weights(self) -> None:
@@ -43,10 +80,17 @@ class TFM(nn.Module):
         
     def forward(self, x):
         x = self.pos_encoder(x)
-        x = self.encoder(x)
+
+        x = self.encoder1(x)
+        x = self.projection1(x)
+        x = self.encoder2(x)
+        x = self.projection2(x)
+        x = self.encoder3(x)
+        x = self.projection3(x)
+        
         x = self.decoder(x)
         return x
-
+    
 class Bottleneck(nn.Module):
     """ Redefinition of Bottleneck residual block
         Adapted from the official PyTorch implementation
