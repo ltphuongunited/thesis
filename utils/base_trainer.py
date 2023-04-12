@@ -95,7 +95,7 @@ class BaseTrainer(object):
                     sys.exit(0)
             
             self.checkpoint=None
-            self.scheduler.step()
+            # self.scheduler.step()
             performance = self.evaluate()
             is_best = performance < self.best_performance
             if is_best:

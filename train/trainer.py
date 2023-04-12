@@ -27,16 +27,26 @@ class Trainer(BaseTrainer):
     
     def init_fn(self):
         self.train_ds = MixedDataset(self.options, ignore_3d=self.options.ignore_3d, is_train=True)
-        # self.model = hmr(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
-        # self.model = hmr_ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
-        # self.model = hmr_hr(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
-        self.model = hmr_tfm(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+        
+        name = self.options.name
+        if 'ktd' in name:
+            self.model = hmr_ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+        elif 'tfm' in name:
+            self.model = hmr_tfm(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+        elif 'vit' in name:
+            self.model = Token3d(smpl_mean_params=config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+        elif 'hr' in name:
+            self.model = hmr_hr(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+        else:
+            self.model = hmr(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         # self.model = ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
-        # self.model = Token3d(smpl_mean_params=config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+        # self.optimizer = torch.optim.Adam(params=self.model.parameters(),
+        #                                   lr=self.options.lr,
+        #                                   weight_decay=0)
         self.optimizer = torch.optim.Adam(params=self.model.parameters(),
                                           lr=self.options.lr,
-                                          weight_decay=0)
-        self.scheduler = StepLR(self.optimizer, step_size=5, gamma=1)
+                                          weight_decay=0.0001)
+        # self.scheduler = StepLR(self.optimizer, step_size=5, gamma=1)
         
         self.smpl = SMPL(config.SMPL_MODEL_DIR,
                          batch_size=self.options.batch_size,

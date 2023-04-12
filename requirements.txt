@@ -16,3 +16,4 @@ trimesh==3.17.1
 Pillow
 h5py
 yacs
+gradio

@@ -24,7 +24,7 @@ class CheckpointSaver():
     def save_checkpoint(self, models, optimizers, epoch, batch_idx, batch_size, dataset_perm, total_step_count, best_performance, lr):
         """Save checkpoint."""
         timestamp = datetime.datetime.now()
-        checkpoint_filename = os.path.abspath(os.path.join(self.save_dir, 'epoch_{:02d}_{}_{:.2f}').format(epoch,total_step_count,best_performance).replace(".", "-") + '.pt')
+        checkpoint_filename = os.path.abspath(os.path.join(self.save_dir, 'epoch_{:02d}_{}_{:.2f}_{}').format(epoch,total_step_count,best_performance,lr).replace(".", "-") + '.pt')
         checkpoint = {}
         for model in models:
             checkpoint[model] = models[model].state_dict()
