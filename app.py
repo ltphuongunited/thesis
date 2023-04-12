@@ -1,16 +1,17 @@
 import gradio as gr
+import torch
+from torchvision import transforms
 import cv2
 
-def process_image(input_image):
-    # Xử lý ảnh đầu vào để tạo ra ảnh đầu ra
-    # Ví dụ: chuyển đổi ảnh thành ảnh xám
-    output_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
-    return output_image
+# Define a function to predict an image using your PyTorch model
+def predict(img):
+    return cv2.imread('output/_output/000000.png')
 
-# Tạo một giao diện người dùng với một input là ảnh và một output là ảnh
+# Define your input component
 input_image = gr.inputs.Image()
-output_image = gr.outputs.Image()
-interface = gr.Interface(fn=process_image, inputs=input_image, outputs=output_image)
 
-# Chạy giao diện người dùng
-interface.launch()
+# Define your output component
+output_image = gr.outputs.Image(type="pil")
+
+# Create a Gradio interface
+gr.Interface(fn=predict, inputs=input_image, outputs=output_image).launch()
