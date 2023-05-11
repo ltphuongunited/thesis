@@ -24,7 +24,7 @@ import pickle
 # a = np.load('data_pymaf/static_Fits/h36m.npy')
 # print(a[10000][:32])
 # print(sum(a[0][:72] < 0))
-data1 = np.load('data/dataset_extras/coco_2014_train_cliff.npz')
+data1 = np.load('data/dataset_extras/3dpw_train.npz')
 data2 = np.load('data/dataset_extras/coco_2014_train.npz')
 # data3 = np.load('data/dataset_extras/h36m_valid_protocol2_newpath.npz')
 print(data1['part'][0])

@@ -1,19 +1,4 @@
-curl -L 'https://drive.google.com/uc?export=download&id=1-Ci_ZnRUZTSzk-YlJyYcD_fVAN7jZXCN&confirm=t' > mpi_1.tar.gz
-curl -L 'https://drive.google.com/uc?export=download&id=1-Ci_ZnRUZTSzk-YlJyYcD_fVAN7jZXCN&confirm=t' > mpi_2.tar.gz
-curl -L 'https://drive.google.com/uc?export=download&id=1-Ci_ZnRUZTSzk-YlJyYcD_fVAN7jZXCN&confirm=t' > mpi_3.tar.gz
-curl -L 'https://drive.google.com/uc?export=download&id=1-72nT4WX9x5l2DuD_cR9ddBFIZcmd3Mp&confirm=t' > mpi_4.tar.gz
-curl -L 'https://drive.google.com/uc?export=download&id=1-82LdeAWdM2aSNDiEVme3BhqcwfFgRfG&confirm=t' > mpi_5.tar.gz
-curl -L 'https://drive.google.com/uc?export=download&id=1-Ja6292GhEl3WhCNwEyz5u0usKNpkhvj&confirm=t' > mpi_6.tar.gz
 
-curl -L 'https://drive.google.com/uc?export=download&id=1pCeKHM3Tm6GMYAnMUBM4Z6h0wyRs373_&confirm=t' > mpi.tar.gz
+python demo.py --checkpoint=checkpoint.pt --image_folder=example1/ --with_raw --sideview --save_obj
 
 
-wget https://vcai.mpi-inf.mpg.de/3dhp-dataset/mpi_inf_3dhp.zip
-
-tmux new -s <tên phiên làm việc>
-tmux attach -t <tên phiên làm việc>
-tmux list-sessions
-tmux kill-session -t <tên phiên làm việc>
-
-
-curl -L 'https://drive.google.com/uc?export=download&id=1BwRolklutDy-xnFSP2VKX5ma1cm7Vxd8&confirm=t' > mpii_cliff.npz

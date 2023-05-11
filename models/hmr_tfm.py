@@ -25,27 +25,6 @@ class PositionalEncoding(nn.Module):
         x = x + self.pe[:x.size(0)]
         return self.dropout(x)
     
-# class TFM(nn.Module):
-#     def __init__(self, input_size=2067,output_size=6,num_layers=6,num_heads=2,hidden_size=512,dropout=0.2):
-#         super(TFM, self).__init__()
-#         self.pos_encoder = PositionalEncoding(input_size, dropout)
-#         self.encoder = nn.TransformerEncoder(
-#             nn.TransformerEncoderLayer(input_size, num_heads, hidden_size, dropout),
-#             num_layers
-#         )
-#         self.decoder = nn.Linear(input_size, output_size)
-#         self.init_weights()
-
-#     def init_weights(self) -> None:
-#         initrange = 0.1
-#         self.decoder.bias.data.zero_()
-#         self.decoder.weight.data.uniform_(-initrange, initrange)
-        
-#     def forward(self, x):
-#         x = self.pos_encoder(x)
-#         x = self.encoder(x)
-#         x = self.decoder(x)
-#         return x
 
 class TFM(nn.Module):
     def __init__(self, input_size=2054,output_size=6,num_layers=4,num_heads=4,dropout=0.2):
@@ -77,10 +56,18 @@ class TFM(nn.Module):
         initrange = 0.1
         self.decoder.bias.data.zero_()
         self.decoder.weight.data.uniform_(-initrange, initrange)
+
+        self.projection1.bias.data.zero_()
+        self.projection1.weight.data.uniform_(-initrange, initrange)
         
+        self.projection2.bias.data.zero_()
+        self.projection2.weight.data.uniform_(-initrange, initrange)
+
+        self.projection3.bias.data.zero_()
+        self.projection3.weight.data.uniform_(-initrange, initrange)
+
     def forward(self, x):
         x = self.pos_encoder(x)
-
         x = self.encoder1(x)
         x = self.projection1(x)
         x = self.encoder2(x)

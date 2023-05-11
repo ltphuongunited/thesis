@@ -1,19 +1,3 @@
-# -*- coding: utf-8 -*-
-# This script is borrowed and extended from https://github.com/mkocabas/VIBE/blob/master/demo.py and https://github.com/nkolot/SPIN/blob/master/demo.py
-# Max-Planck-Gesellschaft zur Förderung der Wissenschaften e.V. (MPG) is
-# holder of all proprietary rights on this computer program.
-# You can only use this computer program if you have closed
-# a license agreement with MPG or you get the right to use the computer
-# program from someone who is authorized to grant you that right.
-# Any use of the computer program without a valid license is prohibited and
-# liable to prosecution.
-#
-# Copyright©2019 Max-Planck-Gesellschaft zur Förderung
-# der Wissenschaften e.V. (MPG). acting on behalf of its Max Planck Institute
-# for Intelligent Systems. All rights reserved.
-#
-# Contact: ps-license@tuebingen.mpg.de
-
 import os
 os.environ['PYOPENGL_PLATFORM'] = 'egl'
 
@@ -33,7 +17,7 @@ from skimage.transform import resize
 from torchvision.transforms import Normalize
 
 # from core.cfgs import cfg, parse_args
-from models import hmr, SMPL
+from models import hmr, SMPL, hmr_tfm, hmr_hr, Token3d, hmr_ktd
 import config
 import constants
 from datasets.inference import Inference
@@ -76,7 +60,7 @@ def run_image_demo(args):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     
     # ========= Define model ========= #
-    if args.regressor == 'hmr-spin':
+    if args.regressor == 'hmr':
         model = hmr(config.SMPL_MEAN_PARAMS).to(device)
     else:
         pass
@@ -233,21 +217,19 @@ def run_video_demo(args):
             del tracking_results[person_id]
 
     # ========= Define model ========= #
-    # if args.regressor == 'hmr-spin':
-    #     model = hmr(config.SMPL_MEAN_PARAMS).to(device)
-    # else:
-    #     pass
-    # # ========= Load pretrained weights ========= #
-    # if args.checkpoint is not None:
-    #     checkpoint = torch.load(args.checkpoint)
-    #     model.load_state_dict(checkpoint['model'], strict=False)
-    # else:
-    #     pass
-    model = hmr(config.SMPL_MEAN_PARAMS).to(device)
-    # model = hmr_ktd(config.SMPL_MEAN_PARAMS)
-    # model = hmr_tfm(config.SMPL_MEAN_PARAMS)
-    # model = ktd(config.SMPL_MEAN_PARAMS)
-    # model=Token3d(config.SMPL_MEAN_PARAMS)
+    name = args.checkpoint
+    if 'ktd' in name:
+        model = hmr_ktd(config.SMPL_MEAN_PARAMS)
+    elif 'tfm' in name:
+        model = hmr_tfm(config.SMPL_MEAN_PARAMS)
+    elif 'vit' in name:
+        model= Token3d(config.SMPL_MEAN_PARAMS)
+    elif 'hr' in name:
+        model = hmr_hr(config.SMPL_MEAN_PARAMS)
+    else:
+        model = hmr(config.SMPL_MEAN_PARAMS)
+
+    model = model.to(device)
     checkpoint = torch.load(args.checkpoint)
     model.load_state_dict(checkpoint['model'], strict=False)
     model.eval()
@@ -325,29 +307,10 @@ def run_video_demo(args):
                     if has_keypoints:
                         batch, nj2d = batch
                         norm_joints2d.append(nj2d.numpy().reshape(-1, 21, 3))
-
-                    # batch = batch.unsqueeze(0)
                     batch = batch.to(device)
-
-                    # batch_size, seqlen = batch.shape[:2]
                     batch_size = batch.shape[0]
                     seqlen = 1
-                    # if args.regressor == 'hmr-spin':
-                    #     output = model(batch)
-                    #     pred_rotmat, pred_betas, pred_camera = model(batch)
-                    #     raise NotImplementedError()
-                    # elif args.regressor == 'pymaf_net':
-                    #     preds_dict, _ = model(batch)
-
-                    # output = preds_dict['smpl_out'][-1]
-
-                    # pred_cam.append(output['theta'][:, :3].reshape(batch_size * seqlen, -1))
-                    # pred_verts.append(output['verts'].reshape(batch_size * seqlen, -1, 3))
-                    # pred_pose.append(output['theta'][:, 13:85].reshape(batch_size * seqlen, -1))
-                    # pred_betas.append(output['theta'][:, 3:13].reshape(batch_size * seqlen, -1))
-                    # pred_joints3d.append(output['kp_3d'].reshape(batch_size * seqlen, -1, 3))
                     rotmat, betas, camera = model(batch)
-                    # print(rotmat.shape, betas.shape, camera.shape)
                     output = smpl(betas=betas, body_pose=rotmat[:,1:], global_orient=rotmat[:,0].unsqueeze(1), pose2rot=False)
                     out_vertices = output.vertices
                     out_joints = output.joints
@@ -426,12 +389,17 @@ def run_video_demo(args):
             if x.endswith('.png') or x.endswith('.jpg')
         ])
 
-        if args.regressor == 'hmr-spin':
+        if 'ktd' in name:
             color_type = 'pink'
-        # elif cfg.MODEL.PyMAF.N_ITER == 0 and cfg.MODEL.PyMAF.AUX_SUPV_ON == False:
-        #     color_type = 'neutral'
-        # else:
-        #     color_type = 'purple'
+        elif 'tfm' in name:
+            color_type = 'neutral'
+        elif 'vit' in name:
+            color_type  = 'white'
+        elif 'hr' in name:
+            color_type = 'green'
+        else:
+            color_type = 'sky'
+
 
         for frame_idx in tqdm(range(len(image_file_names))):
             img_fname = image_file_names[frame_idx]

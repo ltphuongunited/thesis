@@ -245,3 +245,38 @@ def Token3d(smpl_mean_params,num_blocks=12, num_heads=12, st_mode='vanilla', pre
         del state_dict['head.bias']
         model.load_state_dict(state_dict, strict=False)
     return model
+
+def Token3d_v2(smpl_mean_params,num_blocks=12, num_heads=12, st_mode='vanilla', pretrained=True, proj_rot_mode='linear',
+            use_joint2d_head=False, contraint_token_delta=False,
+            use_rot6d_to_token_head=False, mask_ratio=0.,
+            temporal_layers=3, temporal_num_heads=1,
+            enable_temp_modeling=False, enable_temp_embedding=False,
+            **kwargs):
+    """ Hybrid model with a R50 and a Vit of custom layers .
+    """
+    # create a ResNetV2 w/o pre-activation, that uses StdConv and GroupNorm and has 3 stages, no head
+    backbone = ResNetV2(
+        layers=(3, 4, 9), num_classes=0, global_pool='', in_chans=kwargs.get('in_chans', 3),
+        preact=False, stem_type='same')
+    model = TokenPoseRot6d(
+        patch_size=16, embed_dim=768, depth=num_blocks, num_heads=num_heads,
+        hybrid_backbone=None, mlp_ratio=4, qkv_bias=True,
+        representation_size=768, norm_layer=partial(nn.LayerNorm, eps=1e-6),
+        st_mode=st_mode, proj_rot_mode=proj_rot_mode,
+        use_joint2d_head=use_joint2d_head,
+        contraint_token_delta=contraint_token_delta,
+        use_rot6d_to_token_head=use_rot6d_to_token_head,
+        mask_ratio=mask_ratio,
+        temporal_layers=temporal_layers,
+        temporal_num_heads=temporal_num_heads,
+        enable_temp_modeling=enable_temp_modeling, 
+        enable_temp_embedding=enable_temp_embedding,
+        **kwargs)
+    if pretrained:
+        state_dict = model_zoo.load_url(
+            model_urls['vit_base_patch16_224'], progress=False, map_location='cpu')
+        state_dict = _conv_filter(state_dict)
+        del state_dict['head.weight']
+        del state_dict['head.bias']
+        model.load_state_dict(state_dict, strict=False)
+    return model

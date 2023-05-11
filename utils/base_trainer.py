@@ -75,33 +75,34 @@ class BaseTrainer(object):
                     if self.step_count % self.options.checkpoint_steps == 0:
                         # self.validate()
                         performance = self.evaluate()
-                        is_best = performance < self.best_performance
-                        if is_best:
-                            tqdm.write('Best performance achived, saved it!')
-                            self.best_performance = performance
-                            self.saver.save_checkpoint(self.models_dict, self.optimizers_dict, epoch, step+1, self.options.batch_size, train_data_loader.sampler.dataset_perm, self.step_count, self.best_performance, lr)
-                            # tqdm.write('Checkpoint saved')
+                        self.saver.save_checkpoint(self.models_dict, self.optimizers_dict, epoch+1, 0, self.options.batch_size, None, self.step_count, performance, lr)
+                        # is_best = performance < self.best_performance
+                        # if is_best:
+                        #     tqdm.write('Best performance achived, saved it!')
+                        #     self.best_performance = performance
+                        #     self.saver.save_checkpoint(self.models_dict, self.optimizers_dict, epoch, step+1, self.options.batch_size, train_data_loader.sampler.dataset_perm, self.step_count, self.best_performance, lr)
 
                 else:
                     tqdm.write('Timeout reached')
                     self.finalize()
                     performance = self.evaluate()
-                    is_best = performance < self.best_performance
-                    if is_best:
-                        tqdm.write('Best performance achived, saved it!')
-                        self.best_performance = performance
-                        self.saver.save_checkpoint(self.models_dict, self.optimizers_dict, epoch, step, self.options.batch_size, train_data_loader.sampler.dataset_perm, self.step_count, self.best_performance, lr) 
-                    # tqdm.write('Checkpoint saved')
-                    sys.exit(0)
+                    self.saver.save_checkpoint(self.models_dict, self.optimizers_dict, epoch+1, 0, self.options.batch_size, None, self.step_count, performance, lr)
+                    # is_best = performance < self.best_performance
+                    # if is_best:
+                    #     tqdm.write('Best performance achived, saved it!')
+                    #     self.best_performance = performance
+                    #     self.saver.save_checkpoint(self.models_dict, self.optimizers_dict, epoch, step, self.options.batch_size, train_data_loader.sampler.dataset_perm, self.step_count, self.best_performance, lr) 
+                    # sys.exit(0)
             
             self.checkpoint=None
             # self.scheduler.step()
             performance = self.evaluate()
-            is_best = performance < self.best_performance
-            if is_best:
-                tqdm.write('Best performance achived, saved it!')
-                self.best_performance = performance
-                self.saver.save_checkpoint(self.models_dict, self.optimizers_dict, epoch+1, 0, self.options.batch_size, None, self.step_count, self.best_performance, lr)
+            self.saver.save_checkpoint(self.models_dict, self.optimizers_dict, epoch+1, 0, self.options.batch_size, None, self.step_count, performance, lr)
+            # is_best = performance < self.best_performance
+            # if is_best:
+            #     tqdm.write('Best performance achived, saved it!')
+            #     self.best_performance = performance
+            #     self.saver.save_checkpoint(self.models_dict, self.optimizers_dict, epoch+1, 0, self.options.batch_size, None, self.step_count, self.best_performance, lr)
             
             
             # # load a checkpoint only on startup, for the next epochs

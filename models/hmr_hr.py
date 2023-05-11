@@ -105,7 +105,7 @@ class HMR_HR(nn.Module):
         return pred_rotmat, pred_shape, pred_cam
 
 def hmr_hr(smpl_mean_params, pretrained=True, **kwargs):
-    """ Constructs an HMR model with ResNet50 backbone.
+    """ Constructs an HMR model with HRNet-W48 backbone.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """

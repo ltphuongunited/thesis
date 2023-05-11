@@ -42,7 +42,7 @@ parser.add_argument('--checkpoint', default=None, help='Path to network checkpoi
 parser.add_argument('--dataset', choices=['h36m-p1', 'h36m-p2', 'h36m-p2-mosh', 'lsp', '3dpw', 'mpi-inf-3dhp', '3doh50k'],
                                             default='h36m-p2', help='Choose evaluation dataset')
 parser.add_argument('--log_freq', default=100, type=int, help='Frequency of printing intermediate results')
-parser.add_argument('--batch_size', default=8, help='Batch size for testing')
+parser.add_argument('--batch_size', default=64, help='Batch size for testing')
 parser.add_argument('--shuffle', default=False, action='store_true', help='Shuffle data')
 parser.add_argument('--num_workers', default=16, type=int, help='Number of processes for data loading')
 parser.add_argument('--result_file', default=None, help='If set, save detections to a .npz file')

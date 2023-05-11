@@ -6,7 +6,7 @@ import cv2
 
 from datasets import MixedDataset, BaseDataset
 from models import hmr, SMPL, hmr_ktd, hmr_hr, hmr_tfm, ktd
-from models import Token3d
+from models import Token3d, Token3d_v2
 from smplify import SMPLify
 from utils.geometry import batch_rodrigues, perspective_projection, estimate_translation
 from utils.renderer import Renderer
@@ -30,11 +30,17 @@ class Trainer(BaseTrainer):
         
         name = self.options.name
         if 'ktd' in name:
-            self.model = hmr_ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+            if 'v2' in name:
+                self.model = ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+            else:
+                self.model = hmr_ktd(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         elif 'tfm' in name:
             self.model = hmr_tfm(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         elif 'vit' in name:
-            self.model = Token3d(smpl_mean_params=config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+            if 'v2' in name:
+                self.model = Token3d_v2(smpl_mean_params=config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
+            else:
+                self.model = Token3d(smpl_mean_params=config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         elif 'hr' in name:
             self.model = hmr_hr(config.SMPL_MEAN_PARAMS, pretrained=True).to(self.device)
         else:
