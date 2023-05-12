@@ -345,7 +345,7 @@ class Trainer(BaseTrainer):
         J_regressor = torch.from_numpy(np.load(config.JOINT_REGRESSOR_H36M)).float()
         
         shuffle = False
-        batch_size = self.options.batch_size
+        batch_size = 64
         dataset_name = self.options.eval_dataset
         result_file = None
         num_workers = self.options.num_workers

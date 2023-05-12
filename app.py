@@ -28,72 +28,42 @@ from utils.renderer_add import PyRenderer
 from utils.imutils import crop
 from utils.pose_tracker import run_posetracker
 from utils.demo_utils import (
-    download_url,
     convert_crop_cam_to_orig_img,
-    prepare_rendering_results,
-    video_to_images,
-    images_to_video,
+    prepare_rendering_results
 )
 
 MIN_NUM_FRAMES = 1
 
-def run_video_demo(args):
+def run_image_demo(input_image):
+    
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-    if args.image_folder is None:
-        video_file = args.vid_file
+    image_folder = 'input_image/'
+    cv2.imwrite(os.path.join(image_folder, f'input.png'), input_image)
+    num_frames = len(os.listdir(image_folder))
+    img_shape = cv2.imread(osp.join(image_folder, os.listdir(image_folder)[0])).shape
 
-        # ========= [Optional] download the youtube video ========= #
-        if video_file.startswith('https://www.youtube.com'):
-            print(f'Donwloading YouTube video \"{video_file}\"')
-            video_file = download_url(video_file, '/tmp')
-
-            if video_file is None:
-                exit('Youtube url is not valid!')
-
-            print(f'YouTube Video has been downloaded to {video_file}...')
-
-        if not os.path.isfile(video_file):
-            exit(f'Input video \"{video_file}\" does not exist!')
-        
-        output_path = os.path.join(args.output_folder, os.path.basename(video_file).replace('.mp4', ''))
-
-        image_folder, num_frames, img_shape = video_to_images(video_file, return_info=True)
-        
-    else:
-        image_folder = args.image_folder
-        num_frames = len(os.listdir(image_folder))
-        img_shape = cv2.imread(osp.join(image_folder, os.listdir(image_folder)[0])).shape
-        print(image_folder, num_frames, img_shape)
-
-        output_path = os.path.join(args.output_folder, osp.split(image_folder)[-1])
+    output_path = os.path.join('output/', osp.split(image_folder)[-1])
 
     os.makedirs(output_path, exist_ok=True)
 
     print(f'Input video number of frames {num_frames}')
-    if not args.image_based:
-        orig_height, orig_width = img_shape[:2]
+    orig_height, orig_width = img_shape[:2]
 
     total_time = time.time()
 
     # ========= Run tracking ========= #
     bbox_scale = 1.0
-    # bbox_scale = 1.1
-    if args.tracking_method == 'pose':
-        if not os.path.isabs(video_file):
-            video_file = os.path.join(os.getcwd(), video_file)
-        tracking_results = run_posetracker(video_file, staf_folder=args.staf_dir, display=args.display)
-    else:
-        # run multi object tracker
-        mot = MPT(
-            device=device,
-            batch_size=args.tracker_batch_size,
-            display=args.display,
-            detector_type=args.detector,
-            output_format='dict',
-            yolo_img_size=args.yolo_img_size,
-        )
-        tracking_results = mot(image_folder)
+    # run multi object tracker
+    mot = MPT(
+        device=device,
+        batch_size=12,
+        display=False,
+        detector_type='yolo',
+        output_format='dict',
+        yolo_img_size=416,
+    )
+    tracking_results = mot(image_folder)
 
     # remove tracklets if num_frames is less than MIN_NUM_FRAMES
     for person_id in list(tracking_results.keys()):
@@ -101,23 +71,14 @@ def run_video_demo(args):
             del tracking_results[person_id]
 
     # ========= Define model ========= #
-    name = args.checkpoint
-    if 'ktd' in name:
-        model = hmr_ktd(config.SMPL_MEAN_PARAMS)
-    elif 'tfm' in name:
-        model = hmr_tfm(config.SMPL_MEAN_PARAMS)
-    elif 'vit' in name:
-        model= Token3d(config.SMPL_MEAN_PARAMS)
-    elif 'hr' in name:
-        model = hmr_hr(config.SMPL_MEAN_PARAMS)
-    else:
-        model = hmr(config.SMPL_MEAN_PARAMS)
+    name = 'logs/hmr_vit/checkpoints/epoch_37_288575_52-23_5e-06.pt'
+    model = Token3d(config.SMPL_MEAN_PARAMS)
 
     model = model.to(device)
-    checkpoint = torch.load(args.checkpoint)
+    checkpoint = torch.load(name)
     model.load_state_dict(checkpoint['model'], strict=False)
     model.eval()
-    print(f'Loaded pretrained weights from \"{args.checkpoint}\"')
+    print(f'Loaded pretrained weights from \"{name}\"')
 
     # ========= Run pred on each person ========= #
     image_file_names = None
@@ -126,11 +87,8 @@ def run_video_demo(args):
     pred_results = {}
     for person_id in tqdm(list(tracking_results.keys())):
         bboxes = joints2d = None
-
-        if args.tracking_method == 'bbox':
-            bboxes = tracking_results[person_id]['bbox']
-        elif args.tracking_method == 'pose':
-            joints2d = tracking_results[person_id]['joints2d']
+        
+        bboxes = tracking_results[person_id]['bbox']
 
         frames = tracking_results[person_id]['frames']
 
@@ -147,9 +105,9 @@ def run_video_demo(args):
         frames = dataset.frames
         has_keypoints = True if joints2d is not None else False
 
-        dataloader = DataLoader(dataset, batch_size=args.model_batch_size, num_workers=8)
+        dataloader = DataLoader(dataset, batch_size=8, num_workers=8)
         smpl = SMPL(config.SMPL_MODEL_DIR,
-                    batch_size=args.model_batch_size,
+                    batch_size=8,
                     create_transl=False).to(device)
         with torch.no_grad():
 
@@ -211,18 +169,6 @@ def run_video_demo(args):
 
     del model
 
-    end = time.time()
-    fps = num_frames / (end - pred_time)
-
-    print(f'FPS: {fps:.2f}')
-    total_time = time.time() - total_time
-    print(f'Total time spent: {total_time:.2f} seconds (including model loading time).')
-    print(f'Total FPS (including model loading time): {num_frames / total_time:.2f}.')
-
-    print(f'Saving output results to \"{os.path.join(output_path, "output.pkl")}\".')
-
-    joblib.dump(pred_results, os.path.join(output_path, "output.pkl"))
-    # ========= Render results as a single video ========= #
     renderer = PyRenderer(resolution=(orig_width, orig_height))
 
     output_img_folder = os.path.join(output_path, osp.split(image_folder)[-1] + '_output')
@@ -239,25 +185,21 @@ def run_video_demo(args):
         if x.endswith('.png') or x.endswith('.jpg')
     ])
     color_type = 'pink'
-    if args.regressor == 'hmr':
-        color_type = 'pink'
 
     for frame_idx in tqdm(range(len(image_file_names))):
         img_fname = image_file_names[frame_idx]
         img = cv2.imread(img_fname)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-        if args.render_ratio != 1:
-            img = resize(img, (int(img.shape[0] * args.render_ratio), int(img.shape[1] * args.render_ratio)), anti_aliasing=True)
+        render_ratio = 1
+        if render_ratio != 1:
+            img = resize(img, (int(img.shape[0] * render_ratio), int(img.shape[1] * render_ratio)), anti_aliasing=True)
             img = (img * 255).astype(np.uint8)
 
         raw_img = img.copy()
 
-        if args.sideview:
-            side_img = np.zeros_like(img)
-        
-        if args.empty_bg:
-            empty_img = np.zeros_like(img)
+        side_img = np.zeros_like(img)
+
 
         for person_id, person_data in frame_results[frame_idx].items():
             frame_verts = person_data['verts']
@@ -265,143 +207,38 @@ def run_video_demo(args):
 
             mesh_filename = None
 
-            if args.save_obj:
-                mesh_folder = os.path.join(output_path, 'meshes', f'{person_id:04d}')
-                os.makedirs(mesh_folder, exist_ok=True)
-                mesh_filename = os.path.join(mesh_folder, f'{frame_idx:06d}.obj')
+            # file 3D
+            mesh_folder = os.path.join(output_path, 'meshes', f'{person_id:04d}')
+            os.makedirs(mesh_folder, exist_ok=True)
+            mesh_filename = os.path.join(mesh_folder, f'{frame_idx:06d}.obj')
 
-            if args.empty_bg:
-                img, empty_img = renderer(
-                        frame_verts,
-                        img=[img, empty_img],
-                        cam=frame_cam,
-                        color_type=color_type,
-                        mesh_filename=mesh_filename
-                    )
-            else:
-                img = renderer(
-                    frame_verts,
-                    img=img,
-                    cam=frame_cam,
-                    color_type=color_type,
-                    mesh_filename=mesh_filename
-                )
+            img = renderer(
+                frame_verts,
+                img=img,
+                cam=frame_cam,
+                color_type=color_type,
+                mesh_filename=mesh_filename
+            )
 
-            if args.sideview:
-                side_img = renderer(
-                    frame_verts,
-                    img=side_img,
-                    cam=frame_cam,
-                    color_type=color_type,
-                    angle=270,
-                    axis=[0,1,0],
-                )
+            side_img = renderer(
+                frame_verts,
+                img=side_img,
+                cam=frame_cam,
+                color_type=color_type,
+                angle=270,
+                axis=[0,1,0],
+            )
+        return cv2.cvtColor(img, cv2.COLOR_BGR2RGB), mesh_filename
+        
+# Định nghĩa input và output
+input_image = gr.inputs.Image(label="Input Image").style(height=400)
+output_image = gr.outputs.Image(type="numpy", label="Output Image").style(height=300)
+output_3d_model = gr.Model3D(clear_color=[0.0, 0.0, 0.0, 0.0], label="3D Model").style(height=200)
 
-        if args.with_raw:
-            img = np.concatenate([raw_img, img], axis=1)
+interface = gr.Interface(
+    fn=run_image_demo,
+    inputs=input_image,
+    outputs=[output_image, output_3d_model]
+)
 
-        if args.empty_bg:
-            img = np.concatenate([img, empty_img], axis=1)
-
-        if args.sideview:
-            img = np.concatenate([img, side_img], axis=1)
-
-        cv2.imwrite(os.path.join(output_img_folder, f'{frame_idx:06d}.png'), img)
-        imsave(os.path.join(output_img_folder, f'{frame_idx:06d}.png'), img)
-
-    #     if args.display:
-    #         cv2.imshow('Video', img)
-    #         if cv2.waitKey(1) & 0xFF == ord('q'):
-    #             break
-
-    # if args.display:
-    #     cv2.destroyAllWindows()
-
-    # # ========= Save rendered video ========= #
-    # vid_name = osp.split(image_folder)[-1] if args.image_folder is not None else os.path.basename(video_file)
-    # save_name = f'{vid_name.replace(".mp4", "")}_result.mp4'
-    # save_name = os.path.join(output_path, save_name)
-    # if not args.image_based:
-    #     print(f'Saving result video to {save_name}')
-    #     images_to_video(img_folder=output_img_folder, output_vid_file=save_name)
-
-    print('================= END =================')
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--img_file', type=str,
-                        help='Path to a single input image')
-    parser.add_argument('--vid_file', type=str,
-                        help='input video path or youtube link')
-    parser.add_argument('--image_folder', type=str, default=None,
-                        help='input image folder')
-    parser.add_argument('--output_folder', type=str, default='output',
-                        help='output folder to write results')
-    parser.add_argument('--tracking_method', type=str, default='bbox', choices=['bbox', 'pose'],
-                        help='tracking method to calculate the tracklet of a subject from the input video')
-    parser.add_argument('--detector', type=str, default='yolo', choices=['yolo', 'maskrcnn'],
-                        help='object detector to be used for bbox tracking')
-    parser.add_argument('--yolo_img_size', type=int, default=416,
-                        help='input image size for yolo detector')
-    parser.add_argument('--tracker_batch_size', type=int, default=12,
-                        help='batch size of object detector used for bbox tracking')
-    parser.add_argument('--staf_dir', type=str, default='/home/jd/Projects/2D/STAF',
-                        help='path to directory STAF pose tracking method.')
-    parser.add_argument('--regressor', type=str, default='hmr_spin', 
-                        help='Name of the SMPL regressor.')
-    parser.add_argument('--cfg_file', type=str, default='configs/pymaf_config.yaml',
-                        help='config file path.')
-    parser.add_argument('--checkpoint', default=None,
-                        help='Path to network checkpoint')
-    parser.add_argument('--misc', default=None, type=str, nargs="*",
-                        help='other parameters')
-    parser.add_argument('--model_batch_size', type=int, default=8,
-                        help='batch size for SMPL prediction')
-    parser.add_argument('--display', action='store_true',
-                        help='visualize the results of each step during demo')
-    parser.add_argument('--no_render', action='store_true',
-                        help='disable final rendering of output video.')
-    parser.add_argument('--with_raw', action='store_true',
-                        help='attach raw image.')
-    parser.add_argument('--empty_bg', action='store_true',
-                        help='render meshes on empty background.')
-    parser.add_argument('--sideview', action='store_true',
-                        help='render meshes from alternate viewpoint.')
-    parser.add_argument('--image_based', action='store_true',
-                        help='image based reconstruction.')
-    parser.add_argument('--use_gt', action='store_true',
-                        help='use the ground truth tracking annotations.')
-    parser.add_argument('--anno_file', type=str, default='',
-                        help='path to tracking annotation file.')
-    parser.add_argument('--render_ratio', type=float, default=1.,
-                        help='ratio for render resolution')
-    parser.add_argument('--recon_result_file', type=str, default='',
-                        help='path to reconstruction result file.')
-    parser.add_argument('--pre_load_imgs', action='store_true',
-                        help='pred-load input images.')
-    parser.add_argument('--save_obj', action='store_true',
-                        help='save results as .obj files.')
-
-    args = parser.parse_args()
-    print('Run demo for a video input.')
-    run_video_demo(args)
-
-# # Define a function to predict an image using your PyTorch model
-# def process_image(img):
-#     image = cv2.imread('output/_output/000000.png')
-#     # Xử lý ảnh đầu vào để tạo ra ảnh đầu ra
-#     # Ví dụ: chuyển đổi ảnh thành ảnh xám
-#     output_image = image
-#     # output_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-#     return output_image
-
-# # Define your input component with specific size
-# input_image = gr.inputs.Image()
-
-# # Define your output component with specific size
-# output_image = gr.outputs.Image(type="pil", label="Output Image")
-
-
-# # Create the Gradio interface with the same input and output size
-# webapp = gr.interface.Interface(fn=process_image, inputs=input_image, outputs=output_image)
-# webapp.launch()
+interface.launch()

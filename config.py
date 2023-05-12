@@ -24,13 +24,15 @@ DATASET_NPZ_PATH = 'data/dataset_extras'
 OPENPOSE_PATH = 'datasets/openpose'
 
 # Path to test/train npz files
-DATASET_FILES = [ {'h36m-p1': join(DATASET_NPZ_PATH, 'h36m_valid_protocol1_newpath.npz'),
+DATASET_FILES = [ {'h36m-p1': join(DATASET_NPZ_PATH, 'h36m_mosh_train.npz'),
+                  #  'h36m-p1': join(DATASET_NPZ_PATH, 'h36m_valid_protocol1_newpath.npz'),
                    'h36m-p2-mosh': join(DATASET_NPZ_PATH, 'h36m_mosh_valid_p2.npz'),
                    'h36m-p2': join(DATASET_NPZ_PATH, 'h36m_valid_protocol2_newpath.npz'),
                    'lsp': join(DATASET_NPZ_PATH, 'lsp_dataset_test.npz'),
-                   'mpi-inf-3dhp': join(DATASET_NPZ_PATH, 'mpi_inf_3dhp_valid.npz'),
-                   '3dpw': join(DATASET_NPZ_PATH, '3dpw_test.npz'),
-                  #  '3dpw': join(DATASET_NPZ_PATH, '3dpw_valid.npz'),
+                  #  'mpi-inf-3dhp': join(DATASET_NPZ_PATH, 'mpi_inf_3dhp_valid.npz'),
+                   'mpi-inf-3dhp': join(DATASET_NPZ_PATH, 'mpi_inf_3dhp_train.npz'),
+                  #  '3dpw': join(DATASET_NPZ_PATH, '3dpw_test.npz'),
+                   '3dpw': join(DATASET_NPZ_PATH, '3dpw_train.npz')
                   },
 
                   {

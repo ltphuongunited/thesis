@@ -1,4 +1,4 @@
+python demo.py --checkpoint=logs/hmr/checkpoints/epoch_28_136556_56-30.pt --image_folder=test_images/ --with_raw --sideview --save_obj
 
-python demo.py --checkpoint=checkpoint.pt --image_folder=example1/ --with_raw --sideview --save_obj
 
-
+python app.py --image_folder=test_example2/ --with_raw --sideview --save_obj

@@ -463,7 +463,8 @@ def run_video_demo(args):
                 img = np.concatenate([img, empty_img], axis=1)
 
             if args.sideview:
-                img = np.concatenate([img, side_img], axis=1)
+                # img = np.concatenate([img, side_img], axis=1)
+                cv2.imwrite(os.path.join(output_img_folder, f'{frame_idx:06d}.png'), side_img)
 
             cv2.imwrite(os.path.join(output_img_folder, f'{frame_idx:06d}.png'), img)
             if args.image_based:
@@ -471,13 +472,13 @@ def run_video_demo(args):
             else:
                 imsave(os.path.join(output_img_folder, f'{frame_idx:06d}.png'), img)
 
-            if args.display:
-                cv2.imshow('Video', img)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
+            # if args.display:
+            #     cv2.imshow('Video', img)
+            #     if cv2.waitKey(1) & 0xFF == ord('q'):
+            #         break
 
-        if args.display:
-            cv2.destroyAllWindows()
+        # if args.display:
+        #     cv2.destroyAllWindows()
 
         # ========= Save rendered video ========= #
         vid_name = osp.split(image_folder)[-1] if args.image_folder is not None else os.path.basename(video_file)
