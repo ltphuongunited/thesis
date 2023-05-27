@@ -27,7 +27,7 @@ import torchgeometry as tgm
 
 import config
 import constants
-from models import hmr, SMPL, hmr_ktd, hmr_tfm, ktd, Token3d, hmr_hr
+from models import hmr, SMPL, hmr_ktd, hmr_tfm, ktd, Token3d, hmr_hr, Token3d_v2
 from datasets import BaseDataset
 from utils.imutils import uncrop
 from utils.pose_utils import reconstruction_error
@@ -352,7 +352,10 @@ if __name__ == '__main__':
     elif 'tfm' in name:
         model = hmr_tfm(config.SMPL_MEAN_PARAMS)
     elif 'vit' in name:
-        model=Token3d(config.SMPL_MEAN_PARAMS)
+        if 'v2' in name:
+            model = Token3d_v2(config.SMPL_MEAN_PARAMS)
+        else:
+            model = Token3d(config.SMPL_MEAN_PARAMS)
     elif 'hr' in name:
         model = hmr_hr(config.SMPL_MEAN_PARAMS)
     else:

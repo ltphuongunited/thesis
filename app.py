@@ -230,8 +230,7 @@ def run_image_demo(input_image):
             )
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB), mesh_filename
         
-# Định nghĩa input và output
-input_image = gr.inputs.Image(label="Input Image").style(height=400)
+input_image = gr.inputs.Image(label="Input Image")
 output_image = gr.outputs.Image(type="numpy", label="Output Image").style(height=300)
 output_3d_model = gr.Model3D(clear_color=[0.0, 0.0, 0.0, 0.0], label="3D Model").style(height=200)
 

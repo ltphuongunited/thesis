@@ -24,25 +24,26 @@ import pickle
 # a = np.load('data_pymaf/static_Fits/h36m.npy')
 # print(a[10000][:32])
 # print(sum(a[0][:72] < 0))
-data1 = np.load('data/dataset_extras/3dpw_train.npz')
-data2 = np.load('data/dataset_extras/coco_2014_train.npz')
-# data3 = np.load('data/dataset_extras/h36m_valid_protocol2_newpath.npz')
-print(data1['part'][0])
+data1 = np.load('data/smpl_mean_params.npz')
+# data2 = np.load('data/dataset_extras/3dpw_test.npz')
+# data3 = np.load('data/dataset_extras/mpi_inf_3dhp_valid.npz')
+# print(data1['part'][0])
 for key in data1.keys():
     print("variable name:", key, end="  ")
     print("type: "+ str(data1[key].dtype) , end="  ")
     print("shape:"+ str(data1[key].shape))
 
-
-print('='*50)
-print(data2['part'][0])
-for key in data2.keys():
-    print("variable name:", key          , end="  ")
-    print("type: "+ str(data2[key].dtype) , end="  ")
-    print("shape:"+ str(data2[key].shape))
+print(data1['shape'])
+print(data1['pose'])
+# print('='*50)
+# # print(data2['part'][0])
+# for key in data2.keys():
+#     print("variable name:", key          , end="  ")
+#     print("type: "+ str(data2[key].dtype) , end="  ")
+#     print("shape:"+ str(data2[key].shape))
 
 # print('='*50)
-# print(data3['imgname'][100])
+# # print(data3['imgname'][100])
 # for key in data3.keys():
 #     print("variable name:", key          , end="  ")
 #     print("type: "+ str(data3[key].dtype) , end="  ")

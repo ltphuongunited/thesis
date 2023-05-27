@@ -180,6 +180,7 @@ def run_video_demo(args):
             f_id = []
             bbox = []
             for f in frames:
+                orig_height, orig_width = f[:2]
                 f_id.append(f['frame_id'])
                 x_tl, y_tl = f['rect']['tl']['x'] * orig_width, f['rect']['tl']['y'] * orig_height
                 x_br, y_br = f['rect']['br']['x'] * orig_width, f['rect']['br']['y'] * orig_height
@@ -394,7 +395,7 @@ def run_video_demo(args):
         elif 'tfm' in name:
             color_type = 'neutral'
         elif 'vit' in name:
-            color_type  = 'white'
+            color_type  = 'purple'
         elif 'hr' in name:
             color_type = 'green'
         else:
@@ -463,7 +464,7 @@ def run_video_demo(args):
                 img = np.concatenate([img, empty_img], axis=1)
 
             if args.sideview:
-                # img = np.concatenate([img, side_img], axis=1)
+                img = np.concatenate([img, side_img], axis=1)
                 cv2.imwrite(os.path.join(output_img_folder, f'{frame_idx:06d}.png'), side_img)
 
             cv2.imwrite(os.path.join(output_img_folder, f'{frame_idx:06d}.png'), img)

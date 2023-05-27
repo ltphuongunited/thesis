@@ -5,6 +5,23 @@ import numpy as np
 import math
 from utils.geometry import rot6d_to_rotmat
 
+class Masking(nn.Module):
+    def __init__(self, mask_ratio=0.25):
+        super().__init__()
+        self.mask_ratio = mask_ratio
+
+    def forward(self, x):
+        seq_len, batch_size, embedding_dim = x.size()
+        num_mask = int(self.mask_ratio * seq_len)
+        mask = torch.cat([
+            torch.zeros(seq_len - num_mask, device=x.device),
+            torch.ones(num_mask, device=x.device)
+        ])
+        mask = mask[torch.randperm(seq_len, device=x.device)]
+        mask = mask.view(seq_len, 1, 1).expand(seq_len, batch_size, embedding_dim)
+        x = x * (1 - mask)
+        return x
+    
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model: int, dropout: float = 0.1, max_len: int = 24):
         super().__init__()
@@ -27,8 +44,9 @@ class PositionalEncoding(nn.Module):
     
 
 class TFM(nn.Module):
-    def __init__(self, input_size=2054,output_size=6,num_layers=4,num_heads=4,dropout=0.2):
+    def __init__(self, input_size=2054,output_size=6,num_layers=4,num_heads=4,dropout=0.2,mask_ratio=0.25):
         super(TFM, self).__init__()
+        self.masking = Masking(mask_ratio)
         self.pos_encoder = PositionalEncoding(input_size, dropout)
 
         self.encoder1 = nn.TransformerEncoder(
@@ -67,6 +85,7 @@ class TFM(nn.Module):
         self.projection3.weight.data.uniform_(-initrange, initrange)
 
     def forward(self, x):
+        x = self.masking(x)
         x = self.pos_encoder(x)
         x = self.encoder1(x)
         x = self.projection1(x)

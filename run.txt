@@ -1,4 +1,9 @@
-python demo.py --checkpoint=logs/hmr/checkpoints/epoch_28_136556_56-30.pt --image_folder=test_images/ --with_raw --sideview --save_obj
+python demo.py --checkpoint=logs/hmr/checkpoints/epoch_28_136556_56-30.pt --image_folder=test/ --with_raw --sideview --save_obj
 
 
 python app.py --image_folder=test_example2/ --with_raw --sideview --save_obj
+
+python demo.py --checkpoint=logs/hmr/checkpoints/epoch_28_136556_56-30.pt --image_folder=test/ --save_obj --output_folder=output/hmr2
+python demo.py --checkpoint=logs/hmr_ktd/checkpoints/epoch_28_136556_54-41_1e-05.pt --image_folder=test/ --save_obj --output_folder=output/hmr_ktd2
+python demo.py --checkpoint=logs/hmr_tfm/checkpoints/epoch_17_80000_56-40_5e-07.pt --image_folder=test/ --save_obj --output_folder=output/hmr_tfm2
+python demo.py --checkpoint=logs/hmr_vit/checkpoints/epoch_37_288575_52-23_5e-06.pt --image_folder=test/ --save_obj --output_folder=output/hmr_vit2
